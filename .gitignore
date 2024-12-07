@@ -1,0 +1,13 @@
+package-lock.json
+/node_modules
+/vendor
+/.idea
+.idea/
+.env
+public
+node_modules/*
+build/
+.dockerignore
+Dockerfile
+private_key.pem
+public_key.pem
