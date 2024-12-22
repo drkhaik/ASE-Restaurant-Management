@@ -4,7 +4,6 @@ package-lock.json
 /.idea
 .idea/
 .env
-public
 node_modules/*
 build/
 .dockerignore

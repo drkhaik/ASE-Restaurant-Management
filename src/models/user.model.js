@@ -11,8 +11,8 @@ const userSchema = new Schema({
     username: { type: String, trim: true, unique: true },
     email: { type: String, trim: true },
     password: { type: String, required: true },
-    status: { type: String, enum: ['active', 'inactive'], default: 'inactive'},
-    roles: { type: String }
+    status: { type: String, enum: [0,1], default: 0},
+    role_id: { type: Schema.Types.ObjectId, ref: 'Role' }
 }, {
     timestamps: true,
     collection: COLLECTION_NAME

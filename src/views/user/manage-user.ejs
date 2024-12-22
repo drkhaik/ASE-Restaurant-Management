@@ -1,0 +1,16 @@
+    <table>
+        <tr>
+            <th> Employee </th>
+            <th> Salary </th>
+        </tr>
+
+        <% empSalary.forEach(emp=> { %>
+            <tr>
+                <td>
+                    <%= emp.name %>
+                <td>
+                    <%= emp.salary %>
+            </tr>
+            <% }); %>
+
+    </table>
