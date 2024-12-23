@@ -1,33 +1,57 @@
-<h1>
-    <%= title %>
-</h1>
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Salary</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% if (users && users.length> 0) { %>
-            <% users.forEach(user=> { %>
-                <tr>
-                    <td>
-                        <%= user.name %>
-                    </td>
-                    <td>
-                        <%= user.email %>
-                    </td>
-                    <td>
-                        <%= user.salary %>
-                    </td>
-                </tr>
-                <% }) %>
-                    <% } else { %>
-                        <tr>
-                            <td colspan="3">No users found</td>
-                        </tr>
-                        <% } %>
-    </tbody>
-</table>
+
+<div class="manage-user">
+    <h1>
+        <%= title %>
+    </h1>
+    <div class="action-buttons">
+        <button class="button-add">
+            <a href="/add-user">Add new User</a>
+        </button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (users && users.length> 0) { %>
+                <% users.forEach(user=> { %>
+                    <tr>
+                        <td>
+                            <%= user.name %>
+                        </td>
+                        <td>
+                            <%= user.username %>
+                        </td>
+                        <td>
+                            <%= user.email %>
+                        </td>
+                        <td>
+                            <%= user.status %>
+                        </td>
+                        <td>
+                            <%= user.role %>
+                        </td>
+                        <td>
+                            <!-- <button onclick="editUser('<%= user.id %>')">Sửa</button>
+                            <button onclick="viewUser('<%= user.id %>')">Xem</button> -->
+                            <button class="button-update">
+                                <a href="">Update</a>
+                            </button>
+                        </td>
+                    </tr>
+                    <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6">No users found</td>
+                            </tr>
+                            <% } %>
+        </tbody>
+    </table>
+</div>

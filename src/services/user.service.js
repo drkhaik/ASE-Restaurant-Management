@@ -17,7 +17,7 @@ let hashUserPassword = (password) => {
 }
 
 let fetchUserByUsername = async (username) => {
-    return await User.findOne(username).select({ createdAt: 0, updatedAt: 0 });
+    return await User.findOne({username}).select({ createdAt: 0, updatedAt: 0 });
 };
 
 export const saveUserService = (data) => {
@@ -30,13 +30,14 @@ export const saveUserService = (data) => {
                     message: "Username already exists!"
                 })
             } else {
+                console.log("check data", data);
                 let hashPasswordFromBcrypt = await hashUserPassword(data.password);
                 await User.create({
                     name: data.name,
                     username: data.username,
                     email: data.email,
                     password: hashPasswordFromBcrypt,
-                    role_id: data.role_id,
+                    role: data.role,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 })
@@ -51,6 +52,20 @@ export const saveUserService = (data) => {
     })
 }
 
+export const getRolesService = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let roles = await Role.find({}).select({ createdAt: 0, updatedAt: 0, description: 0 });
+            resolve({
+                errCode: 0,
+                message: "OK",
+                data: roles
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 
 export const fetchAllUserService = () => {
     return new Promise(async (resolve, reject) => {

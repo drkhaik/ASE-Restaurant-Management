@@ -1,6 +1,7 @@
 'use strict';
 
-const { model, Schema } = require('mongoose');
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
 
 const DOCUMENT_NAME = 'WorkSchedule';
 const COLLECTION_NAME = 'WorkSchedules';
@@ -17,4 +18,6 @@ const workScheduleSchema = new Schema({
     collection: COLLECTION_NAME
 });
 
-module.exports = model(DOCUMENT_NAME, workScheduleSchema);
+const WorkSchedule = mongoose.model(DOCUMENT_NAME, workScheduleSchema);
+
+export default WorkSchedule;
