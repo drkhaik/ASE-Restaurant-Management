@@ -3,7 +3,9 @@
 import Express from "express";
 const router = Express.Router();
 import {
-    fetchAllUser
+    fetchAllUser,
+    getUserCreate,
+    postUserCreate
 }
 from "../controllers/user.controller.js"
 
@@ -30,6 +32,9 @@ router.get('/test', (req, res) => {
     res.render('index', { title: 'Home Page' });
 });
 
-router.get('/retrieve-users', fetchAllUser);
+router.get('/add-user', getUserCreate);
+router.post('/add-user', postUserCreate);
+router.get('/users', fetchAllUser);
+
 
 export default router;

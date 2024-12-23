@@ -13,13 +13,13 @@ const userSchema = new Schema({
     email: { type: String, trim: true },
     password: { type: String, required: true },
     status: { type: String, enum: [0,1], default: 0},
-    role_id: { type: Schema.Types.ObjectId, ref: 'Role' }
+    role: { type: String }
 }, {
     timestamps: true,
     collection: COLLECTION_NAME
 });
 
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model(DOCUMENT_NAME, userSchema);
 
 export default User;
