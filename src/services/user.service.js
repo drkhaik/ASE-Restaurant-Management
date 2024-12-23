@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import User from '../models/user.model';
-import Role from '../models/role.model';
+import User from '../models/user.model.js';
+import Role from '../models/role.model.js';
 import _ from 'lodash';
 
 const salt = bcrypt.genSaltSync(10);
@@ -20,7 +20,7 @@ let fetchUserByUsername = async (username) => {
     return await User.findOne(username).select({ createdAt: 0, updatedAt: 0 });
 };
 
-let saveUserService = (data) => {
+export const saveUserService = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             let isExist = await fetchUserByUsername(data.username);
@@ -52,11 +52,11 @@ let saveUserService = (data) => {
 }
 
 
-let fetchAllUserService = () => {
+export const fetchAllUserService = () => {
     return new Promise(async (resolve, reject) => {
         try {
             let users = await User.find({}, { password: 0 })
-                .populate('roleID', 'name');
+                // .populate('roleID', 'name');
             resolve({
                 errCode: 0,
                 message: "OK",
@@ -68,7 +68,7 @@ let fetchAllUserService = () => {
     })
 }
 
-let handleLoginService = (username, password) => {
+export const handleLoginService = (username, password) => {
     return new Promise(async (resolve, reject) => {
         try {
             let response = {}
@@ -106,13 +106,5 @@ let handleLoginService = (username, password) => {
             reject(e)
         }
     })
-}
-
-
-module.exports = {
-    hashUserPassword: hashUserPassword,
-    handleLoginService: handleLoginService,
-    saveUserService: saveUserService,
-    fetchAllUserService: fetchAllUserService,
 }
 

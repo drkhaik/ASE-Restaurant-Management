@@ -1,7 +1,8 @@
 'use strict'
 // With strict mode, you can not use undeclared variables.
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
 
-const { model, Schema, Types } = require('mongoose');
 
 const DOCUMENT_NAME = 'User';
 const COLLECTION_NAME = 'Users';
@@ -19,4 +20,6 @@ const userSchema = new Schema({
 });
 
 
-module.exports = model(DOCUMENT_NAME, userSchema);
+const User = mongoose.model('User', userSchema);
+
+export default User;
