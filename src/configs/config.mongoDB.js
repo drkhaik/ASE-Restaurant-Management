@@ -1,7 +1,8 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+import dotenv from 'dotenv';
+dotenv.config();
+import mongoose from 'mongoose';
 
-const connectToDatabase = () => {
+export const connectToDatabase = () => {
     return new Promise((resolve, reject) => {
         let databaseURI = process.env.DATABASE_URI;
         if (process.env.NODE_ENV === 'production') {
@@ -21,5 +22,3 @@ const connectToDatabase = () => {
         });
     })
 };
-
-module.exports = connectToDatabase;

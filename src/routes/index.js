@@ -4,7 +4,7 @@ import userRoute from './user.js';
 const router = Express.Router();
 
 const initApiRoutes = (app) => {
-    router.use("/users", userRoute);
+    router.use(userRoute);
 
     return app.use(router);
 }

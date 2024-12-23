@@ -2,11 +2,10 @@
 
 import Express from "express";
 const router = Express.Router();
-
-router.use('/users', (req, res, next) => {
-    // authorize here
-    next();
-});
+import {
+    fetchAllUser
+}
+from "../controllers/user.controller.js"
 
 const empSalary = [
     {
@@ -31,8 +30,6 @@ router.get('/test', (req, res) => {
     res.render('index', { title: 'Home Page' });
 });
 
-router.get('/manage-user', (req, res) => {
-    res.render('user/manage-user', { title: 'Manage User', empSalary: empSalary });
-});
+router.get('/retrieve-users', fetchAllUser);
 
 export default router;

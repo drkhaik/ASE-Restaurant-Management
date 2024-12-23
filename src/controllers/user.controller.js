@@ -1,6 +1,10 @@
-import userService from '../services/user.service';
+import {
+    handleLoginService,
+    saveUserService,
+    fetchAllUserService
+} from '../services/user.service.js';
 
-let handleLogin = async (req, res) => {
+export const handleLogin = async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
     if (!email || !password) {
@@ -10,7 +14,7 @@ let handleLogin = async (req, res) => {
         })
     }
     try {
-        let response = await userService.handleLoginService(email, password)
+        let response = await handleLoginService(email, password)
         // if (response?.data?.access_token) {
         //     res.cookie("jwt", response.data.access_token,
         //         { httpOnly: true, maxAge: 60 * 60 * 1000, secure: true, sameSite: 'none' });
@@ -26,9 +30,9 @@ let handleLogin = async (req, res) => {
 }
 
 
-let saveNewUser = async (req, res) => {
+export const saveNewUser = async (req, res) => {
     try {
-        let response = await userService.saveUserService(req.body);
+        let response = await saveUserService(req.body);
         return res.status(200).json(response);
     } catch (e) {
         return res.status(200).json({
@@ -38,22 +42,19 @@ let saveNewUser = async (req, res) => {
     }
 }
 
-let fetchAllUser = async (req, res) => {
+export const fetchAllUser = async (req, res) => {
     try {
-        let response = await userService.fetchAllUserService();
-        return res.status(200).json(response);
-
+        let response = await fetchAllUserService();
+        if (response.errCode === 0) {
+            res.render('user/manage-user', { title: 'Get all User', users: response.data });
+        } else {
+            res.status(500).json({ message: response.message });
+        }
     } catch (e) {
+        console.log("check e", e);
         return res.status(200).json({
             errCode: -1,
             message: "Error from server...",
         })
     }
-}
-
-
-module.exports = {
-    handleLogin,
-    fetchAllUser,
-    saveNewUser
 }
