@@ -1,0 +1,107 @@
+<div class="manager-order">
+    <h1><%= title %></h1>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="button-add">
+            <a href="/add-order">Add New Order</a>
+        </button>
+    </div>
+
+    <!-- Orders Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Staff In Charge</th>
+                <th>Total Amount</th>
+                <th>Order Time</th>
+                <th>Status</th>
+                <th>Details</th> <!-- Added column for dropdown -->
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (orders && orders.length > 0) { %>
+                <% orders.forEach(order => { %>
+                    <!-- Order Row -->
+                    <tr>
+                        <td><%= order._id %></td>
+                        <td><%= order.staff_in_charge.name %></td>
+                        <td><%= order.total_amount %> $</td>
+                        <td>
+                            <% if (order.order_time.hours > 0) { %>
+                                <%= order.order_time.hours %> hrs <%= order.order_time.minutes %> mins ago
+                            <% } else { %>
+                                <%= order.order_time.minutes %> minutes ago
+                            <% } %>
+                        </td>
+                        
+                        <td>
+                            <span class="status status-<%= order.status.name.toLowerCase() %>">
+                                <%= order.status.name %>
+                            </span>
+                        </td>
+                        <td>
+                            <!-- Dropdown Button to Show/Hide Order Details -->
+                            <button class="button-dropdown" onclick="toggleOrderDetails('<%= order._id %>')">
+                                Show Details
+                            </button>
+                            <!-- Order Details Container -->
+                            <div id="order-details-<%= order._id %>" class="order-details">
+                                <% if (order.details && order.details.length > 0) { %>
+                                    <table>
+
+                                        <tbody>
+                                            <% order.details.forEach(detail => { %>
+                                                <tr>
+                                                    <td><%= detail.dish.name %></td>
+                                                    <td><%= detail.quantity %></td>
+                                                    <td><%= detail.dish.price %> $</td>
+                                                    <td>
+                                                        <!-- Action Buttons -->
+                                                        <button class="button-delete" title="Remove this dish">
+                                                            <a href="/delete-order/<%= order._id %>">-</a>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                <% } %>
+                            </div>
+                        </td>
+                        <td>
+                            <!-- Action Buttons -->
+                            <button class="button-update">
+                                <a href="/update-order/<%= order._id %>" title="Update this order">Update</a>
+                            </button>
+                            <button class="button-delete">
+                                <a href="/delete-order/<%= order._id %>" title="Delete this dish">Delete</a>
+                            </button>
+                        </td>
+
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <!-- No Orders Message -->
+                <tr>
+                    <td colspan="7">No orders found</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function toggleOrderDetails(orderId) {
+    var details = document.getElementById('order-details-' + orderId);
+    
+    // Toggle visibility
+    if (details.style.display === 'none' || details.style.display === '') {
+        details.style.display = 'block'; // Show details
+    } else {
+        details.style.display = 'none'; // Hide details
+    }
+}
+</script>
