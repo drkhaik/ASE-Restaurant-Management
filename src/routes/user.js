@@ -5,7 +5,9 @@ const router = Express.Router();
 import {
     fetchAllUser,
     getUserCreate,
-    postUserCreate
+    postUserCreate,
+    getUserEdit,
+    postUserUpdate
 }
 from "../controllers/user.controller.js"
 
@@ -32,9 +34,16 @@ router.get('/test', (req, res) => {
     res.render('index', { title: 'Home Page' });
 });
 
+// add user
 router.get('/add-user', getUserCreate);
 router.post('/add-user', postUserCreate);
+
+// get user
 router.get('/users', fetchAllUser);
+
+// update user
+router.get('/edit-user/:id', getUserEdit); // Thêm :id để nhận ID người dùng
+router.post('/update-user', postUserUpdate); 
 
 
 export default router;

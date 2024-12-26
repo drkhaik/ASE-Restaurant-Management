@@ -2,7 +2,9 @@ import {
     handleLoginService,
     saveUserService,
     fetchAllUserService,
-    getRolesService
+    getRolesService,
+    fetchUserById,
+    updateUserService
 } from '../services/user.service.js';
 
 export const handleLogin = async (req, res) => {
@@ -53,6 +55,43 @@ export const postUserCreate = async (req, res, next) => {
             return res.redirect('/users');
         } else {
             return res.status(500).json({ message: response.message });
+        }
+    } catch (e) {
+        console.log("check e", e);
+        return res.status(200).json({
+            errCode: -1,
+            message: "Error from server...",
+        })
+    }
+}
+
+/*get và update user*/
+export const getUserEdit = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        // console.log("check user Id", userId);
+        const user = await fetchUserById(userId);
+        const roles = await getRolesService();
+        if (user.errCode === 0) {
+            res.render('./user/form-edit-user', { title: 'Update User', user: user.data, roles: roles.data });
+        } else {
+            res.status(500).json({ message: 'Error retrieving user' });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Sth went wrong...');
+    }
+}
+
+export const postUserUpdate = async (req, res, next) => {
+    try {
+        console.log("check req.body update", req.body);
+        let updateResponse = await updateUserService(req.body);
+        if (updateResponse.errCode === 0) {
+            return res.redirect('/users');
+        } else {
+            return res.status(500).json({ message: updateResponse.message });
         }
     } catch (e) {
         console.log("check e", e);

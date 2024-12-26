@@ -1,0 +1,40 @@
+<div class="container-form-add-user">
+    <div class="return-buttons">
+        <a href="/users">Return</a>
+    </div>
+    <div class="form-add-user">
+        <h2>
+            <%= title %>
+        </h2>
+    <form action="/update-user" method="POST">
+        <input type="hidden" name="_id" value="<%= user.id %>">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="<%= user.name %>" required><br>
+        </div>
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" value="<%= user.username %>" disabled><br>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="<%= user.email %>" required><br>
+        </div>
+        <div>
+            <label for="status">Status:</label>
+            <input type="text" id="status" name="status" value="<%= user.status %>" required><br>
+        </div>
+        <div>
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <% roles.forEach(role=> { %>
+                    <option value="<%= role.name %>" <%=user.role===role.name ? 'selected' : '' %>><%= role.name %>
+                    </option>
+                    <% }) %>
+            </select><br>
+        </div>
+
+        <button type="submit">Update</button>
+    </form>
+    </div>
+</div>

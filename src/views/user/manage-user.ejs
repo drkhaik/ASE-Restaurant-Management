@@ -39,10 +39,8 @@
                             <%= user.role %>
                         </td>
                         <td>
-                            <!-- <button onclick="editUser('<%= user.id %>')">Sửa</button>
-                            <button onclick="viewUser('<%= user.id %>')">Xem</button> -->
                             <button class="button-update">
-                                <a href="">Update</a>
+                                <a href="/edit-user/<%= user.id %>" class="button-update">Update</a>
                             </button>
                         </td>
                     </tr>

@@ -67,6 +67,67 @@ export const getRolesService = () => {
     })
 }
 
+export const fetchUserById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let user = await User.findOne({
+                // raw: true,
+                _id: id
+            }).select({
+                __v: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                password: 0,
+            });
+            // users.get({ plain: true });
+            resolve({
+                errCode: 0,
+                message: "OK",
+                data: user
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
+export const updateUserService = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data._id) {
+                resolve({
+                    errCode: 2,
+                    message: 'Missing required parameters!'
+                })
+            }
+            let user = await User.findOne({
+                _id: data._id
+            })
+            // console.log("check res", user);
+            if (user) {
+                user.name = data.name;
+                user.email = data.email;
+                user.status = data.status;
+                user.role = data.role;
+                user.updatedAt = new Date();
+                // await user.save(); // lưu 1 đối tượng ko quan tâm đã có hay chưa
+                await User.updateOne({ _id: data._id }, user);
+                resolve({
+                    errCode: 0,
+                    message: `Ok`
+                });
+            } else {
+                resolve({
+                    errCode: 1,
+                    message: `The User not found!`
+                })
+            }
+        } catch (e) {
+            reject(e);
+        }
+    })
+}
+
 export const fetchAllUserService = () => {
     return new Promise(async (resolve, reject) => {
         try {
