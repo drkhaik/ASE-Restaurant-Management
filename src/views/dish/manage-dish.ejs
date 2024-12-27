@@ -1,0 +1,60 @@
+<div class="manager-dish">
+    <h1><%= title %></h1>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="button-add">
+            <a href="dishes/add-dish">Add New Dish</a>
+        </button>
+    </div>
+
+    <!-- Dishs Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Dish ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (dishes && dishes.length > 0) { %>
+                <% dishes.forEach(dish => { %>
+                    <!-- Dish Row -->
+                    <tr>
+                        <td><%= dish._id %></td>
+                        <td><%= dish.name %></td>
+                        <td><%= dish.description %></td>
+                        <% 
+                        const categoryMap = {
+                            starter: 'Starter',
+                            main_dish: 'Main Dish',
+                            dessert: 'Dessert'
+                        };
+                        %>
+                    <td><%= categoryMap[dish.category] || 'Unknown' %></td>
+                        <td><%= dish.price %> $</td>
+                        <td>
+                            <!-- Action Buttons -->
+                            <button class="button-update">
+                                <a href="dishes/edit-dish/<%= dish._id %>" title="Update this dish">Update</a>
+                            </button>
+                            <button class="button-delete">
+                                <a href="dishes/<%= dish._id %>" title="Delete this dish">Delete</a>
+                            </button>
+                        </td>
+
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <!-- No Dishs Message -->
+                <tr>
+                    <td colspan="7">No dishes found</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
