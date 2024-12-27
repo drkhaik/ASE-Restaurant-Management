@@ -9,29 +9,14 @@ import {
 }
 from "../controllers/order.controller.js"
 
-// const empOrder = [
-//     {
-//         name: "Sayan Ghosh",
-//         salary: 37000
-//     },
-//     {
-//         name: "Susmita Sahoo",
-//         salary: 365000
-//     },
-//     {
-//         name: "Nabonita Santra",
-//         salary: 36000
-//     },
-//     {
-//         name: "Anchit Ghosh",
-//         salary: 30000
-//     }
-// ]
-
-
+// Add order
 router.get('/add-order', getOrderCreate);
 router.post('/add-order', postOrderCreate);
-router.get('/orders', fetchAllOrder);
+
+// Get order
+router.get('/', fetchAllOrder);
+
+// Update order
 
 
 export default router;

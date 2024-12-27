@@ -7,7 +7,9 @@ import {
     getUserCreate,
     postUserCreate,
     getUserEdit,
-    postUserUpdate
+    postUserUpdate,
+    getUserLogin,
+    handleLogin
 }
 from "../controllers/user.controller.js"
 
@@ -30,16 +32,17 @@ const empSalary = [
     }
 ]
 
-router.get('/test', (req, res) => {
-    res.render('index', { title: 'Home Page' });
-});
+// login
+router.get('/login', getUserLogin);
+router.post('/login', handleLogin);
+
 
 // add user
 router.get('/add-user', getUserCreate);
 router.post('/add-user', postUserCreate);
 
 // get user
-router.get('/users', fetchAllUser);
+router.get('/', fetchAllUser);
 
 // update user
 router.get('/edit-user/:id', getUserEdit); // Thêm :id để nhận ID người dùng

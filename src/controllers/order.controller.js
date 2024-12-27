@@ -8,13 +8,12 @@ import {
 /*Get và post tạo order mới*/
 export const getOrderCreate = async (req, res, next) => {
     try {
-        let userResponse = await getUsersService('1');
         // let dishResponse = await getDishesService();
-        if (userResponse.errCode === 0) {
-            res.render('./order/form-add-order', { title: 'Add new Order', users: userResponse.data });
-        } else {
-            res.status(500).json({ message: userResponse.message });
-        }
+        // if (userResponse.errCode === 0) {
+            res.render('./order/form-add-order', { title: 'Add new Order', dishes: {} });
+        // } else {
+        //     res.status(500).json({ message: userResponse.message });
+        // }
     } catch (error) {
         console.error(error);
         res.status(500).send('Sth went wrong...');
