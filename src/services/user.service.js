@@ -20,6 +20,10 @@ let fetchUserByUsername = async (username) => {
     return await User.findOne({username}).select({ createdAt: 0, updatedAt: 0 });
 };
 
+export const fetchUserExceptManagerRole = async() => {
+    return await User.find({ role: { $ne: 'Manager' } });
+}
+
 export const saveUserService = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -128,7 +132,7 @@ export const updateUserService = (data) => {
     })
 }
 
-export const fetchAllUserService = () => {
+export const fetchUsersService = () => {
     return new Promise(async (resolve, reject) => {
         try {
             let users = await User.find({}, { password: 0 })
