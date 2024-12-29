@@ -21,10 +21,10 @@ router.post('/add-inventory', handleAddInventory);
 router.get('/edit-inventory/:id', renderEditInventoryForm);
 
 // Route to handle editing inventory
-router.post('/edit-inventory/:id', handleEditInventory);
+router.post('/update-inventory/:id', handleEditInventory);
 
 // Route to render "Manage Inventory" page
-router.get('/manage-inventory', renderManageInventory);
+router.get('/', renderManageInventory);
 
 // Route to handle deleting inventory
 router.post('/delete-inventory/:id', handleDeleteInventory);

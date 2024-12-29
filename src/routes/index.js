@@ -15,7 +15,7 @@ const initApiRoutes = (app) => {
     router.use('/orders',orderRoute);
     router.use('/dishes',dishRoute);
     router.use('/payment', paymentRoute);
-    router.use(inventoryRoute);
+    router.use('/inventories', inventoryRoute);
     router.use((req, res) => {
         res.status(404).render('404', { title: '404' });
 

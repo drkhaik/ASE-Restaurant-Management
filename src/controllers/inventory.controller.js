@@ -14,35 +14,64 @@ export const handleAddInventory = async (req, res) => {
     const { body } = req;
     const result = await createInventoryService(body);
     if (result.errCode === 0) {
-        res.redirect('/manage-inventory');
+        res.redirect('/inventories');
     } else {
         res.status(400).render('form-add-inventory', { title: 'Add Inventory', error: result.message });
     }
 };
 
-export const renderEditInventoryForm = async (req, res) => {
-    const { id } = req.params;
-    const result = await fetchInventoryByIdService(id);
-    if (result.errCode === 0) {
-        res.render('inventory/form-edit-inventory', { title: 'Edit Inventory', inventory: result.data });
-    } else {
-        res.status(404).render('error', { message: result.message });
-    }
-};
+    export const renderEditInventoryForm = async (req, res) => {
+        const { id } = req.params;
+        const result = await fetchInventoryByIdService(id);
+        if (result.errCode === 0) {
+            console.log("Inventory found. Rendering form...");
+            res.render('inventory/form-edit-inventory', { title: 'Edit Inventory', item: result.data });
+        } else {
+            console.log("Inventory not found or error occurred:", result.message);
+            res.status(404).render('404', { title: '404' });
+        }
+        
+    };
+
 
 export const handleEditInventory = async (req, res) => {
     const { id } = req.params;
     const { body } = req;
     const result = await updateInventoryService(id, body);
     if (result.errCode === 0) {
-        res.redirect('/manage-inventory');
+        res.redirect('/inventories');
     } else {
-        res.status(400).render('form-edit-inventory', { title: 'Edit Inventory', error: result.message });
+        // Fetch the current inventory to populate the form
+        const inventory = await fetchInventoryByIdService(id);
+        res.status(400).render('inventory/form-edit-inventory', {
+            title: 'Edit Inventory',
+            error: result.message,
+            item: inventory.data, // Pass the current inventory data
+        });
     }
 };
 
+
+
 export const renderManageInventory = async (req, res) => {
     const result = await fetchAllInventoryService();
+
+    if (result.errCode === 0) {
+        res.render('inventory/manage-inventory', { title: 'Manage Inventory', inventories: result.data }); //inventories: result.data
+    } else {
+        res.status(500).render('error', { message: result.message });
+    }
+};
+
+export const handleDeleteInventory = async (req, res) => {
+    const { id } = req.params;
+    const result = await deleteInventoryService(id);
+    if (result.errCode === 0) {
+        res.redirect('/inventories');
+    } else {
+        res.status(400).render('inventories', { title: 'Manage Inventory', error: result.message });
+    }
+};
     // const Inven=[
     //     {
     //       "id": "1",
@@ -69,19 +98,3 @@ export const renderManageInventory = async (req, res) => {
     //       "description": "Brews coffee in under 5 minutes."
     //     }
     //   ]
-    if (result.errCode === 0) {
-        res.render('inventory/manage-inventory', { title: 'Manage Inventory', inventories: result.data }); //inventories: result.data
-    } else {
-        res.status(500).render('error', { message: result.message });
-    }
-};
-
-export const handleDeleteInventory = async (req, res) => {
-    const { id } = req.params;
-    const result = await deleteInventoryService(id);
-    if (result.errCode === 0) {
-        res.redirect('inventory/manage-inventory');
-    } else {
-        res.status(400).render('manage-inventory', { title: 'Manage Inventory', error: result.message });
-    }
-};

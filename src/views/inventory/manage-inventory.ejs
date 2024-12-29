@@ -4,7 +4,7 @@
     </h1>
     <div class="action-buttons">
         <button class="button-add">
-            <a href="/add-inventory">Add New Inventory Item</a>
+            <a href="/inventories/add-inventory">Add New Inventory Item</a>
         </button>
     </div>
     <table>
@@ -39,7 +39,10 @@
                         </td>
                         <td>
                             <button class="button-update">
-                                <a href="/edit-inventory/<%= inventory.id %>" class="button-update">Update</a>
+                                <a href="inventories/edit-inventory/<%= inventory.id %>" class="button-update">Update</a>
+                            </button>
+                            <button class="button-delete">
+                                <a href="inventories/delete-inventory/<%= inventory.id %>" class="button-delete">Delete</a>
                             </button>
                         </td>
                     </tr>

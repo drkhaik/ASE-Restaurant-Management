@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Inventory from '../models/inventory.model.js';
 
 export const createInventoryService = async (data) => {
@@ -33,6 +34,7 @@ export const fetchInventoryByIdService = async (id) => {
         return { errCode: 1, message: error.message };
     }
 };
+
 
 export const updateInventoryService = async (id, data) => {
     try {
