@@ -4,7 +4,7 @@
     <!-- Action Buttons -->
     <div class="action-buttons">
         <button class="button-add">
-            <a href="/add-order">Add New Order</a>
+            <a href="orders/add-order">Add New Order</a>
         </button>
     </div>
 
@@ -61,7 +61,7 @@
                                                     <td>
                                                         <!-- Action Buttons -->
                                                         <button class="button-delete" title="Remove this dish">
-                                                            <a href="/delete-order/<%= order._id %>">-</a>
+                                                            <a href="orders/<%= order._id %>">-</a>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -74,10 +74,10 @@
                         <td>
                             <!-- Action Buttons -->
                             <button class="button-update">
-                                <a href="/update-order/<%= order._id %>" title="Update this order">Update</a>
+                                <a href="orders/update-order/<%= order._id %>" title="Update this order">Update</a>
                             </button>
                             <button class="button-delete">
-                                <a href="/delete-order/<%= order._id %>" title="Delete this dish">Delete</a>
+                                <a href="orders/<%= order._id %>" title="Delete this dish">Delete</a>
                             </button>
                         </td>
 

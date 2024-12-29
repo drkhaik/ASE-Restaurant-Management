@@ -6,7 +6,7 @@
         <h2>
             <%= title %>
         </h2>
-    <form action="/update-user" method="POST">
+    <form action="/users/update-user" method="POST">
         <input type="hidden" name="_id" value="<%= user.id %>">
         <div>
             <label for="name">Name:</label>
@@ -22,7 +22,7 @@
         </div>
         <div>
             <label for="status">Status:</label>
-            <input type="text" id="status" name="status" value="<%= user.status %>" required><br>
+            <input type="number" id="status" name="status" value="<%= user.status %>" required><br>
         </div>
         <div>
             <label for="role">Role:</label>

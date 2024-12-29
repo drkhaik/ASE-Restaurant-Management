@@ -1,0 +1,36 @@
+<div class="container-form-add-user">
+    <div class="return-buttons">
+        <a href="/work-schedules">Return</a>
+    </div>
+    <div class="form-add-user">
+        <h2>
+            <%= title %>
+        </h2>
+        <form action="/work-schedules/add-work-schedule" method="POST">
+            <div>
+                <label for="user">User:</label>
+                <select id="user" name="user_id" required>
+                    <% users.forEach(user=> { %>
+                        <option value="<%= user._id %>">
+                            <%= user.name %>
+                        </option>
+                        <% }); %>
+                </select>
+            </div>
+            <div>
+                <label for="shift">Shift:</label>
+                <select id="shift" name="shift" required>
+                    <option value="10am-6pm">10am - 6pm</option>
+                    <option value="6pm-12am">6pm - 12am</option>
+                    <option value="all-day">All Day</option>
+                </select>
+            </div>
+            <div>
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <button type="submit">Add Schedule</button>
+
+        </form>
+    </div>
+</div>

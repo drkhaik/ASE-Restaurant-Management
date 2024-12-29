@@ -1,36 +1,56 @@
 import {
     handleLoginService,
     saveUserService,
-    fetchAllUserService,
+    fetchUsersService,
     getRolesService,
     fetchUserById,
     updateUserService
 } from '../services/user.service.js';
 
+export const getUserLogin = async (req, res) => {
+    res.render('user/login', { title: 'Login Page' });
+}
+
 export const handleLogin = async (req, res) => {
-    let email = req.body.email;
+    let username = req.body.username;
     let password = req.body.password;
-    if (!email || !password) {
-        return res.status(200).json({
+
+    // Validate input parameters
+    if (!username || !password) {
+        return res.status(400).json({
             errCode: 1,
             message: 'Missing input parameters!'
-        })
+        });
     }
+
     try {
-        let response = await handleLoginService(email, password)
+        let response = await handleLoginService(username, password);
+
         // if (response?.data?.access_token) {
-        //     res.cookie("jwt", response.data.access_token,
-        //         { httpOnly: true, maxAge: 60 * 60 * 1000, secure: true, sameSite: 'none' });
+        //     res.cookie("jwt", response.data.access_token, {
+        //         httpOnly: true,
+        //         maxAge: 60 * 60 * 1000, // 1 hour
+        //         secure: true,
+        //         sameSite: 'none'
+        //     });
         // }
-        return res.status(200).json(response);
+
+        // Return the login response (e.g., invalid credentials)
+        // return res.status(200).json(response);
+
+        return res.redirect('/users')
+
     } catch (e) {
-        // console.log("check e", e);
-        return res.status(200).json({
+        console.error("Login error:", e);
+
+        // Handle any unexpected errors
+        return res.status(500).json({
             errCode: -1,
-            // message: res.message,
-        })
+            message: 'An error occurred while processing the request.'
+        });
     }
-}
+};
+
 
 /*Get và post tạo user mới*/
 export const getUserCreate = async (req, res, next) => {
@@ -102,9 +122,9 @@ export const postUserUpdate = async (req, res, next) => {
     }
 }
 
-export const fetchAllUser = async (req, res) => {
+export const fetchUsers = async (req, res) => {
     try {
-        let response = await fetchAllUserService();
+        let response = await fetchUsersService();
         if (response.errCode === 0) {
             res.render('user/manage-user', { title: 'User Management', users: response.data });
         } else {

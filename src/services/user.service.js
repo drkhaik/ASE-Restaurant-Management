@@ -20,6 +20,10 @@ let fetchUserByUsername = async (username) => {
     return await User.findOne({username}).select({ createdAt: 0, updatedAt: 0 });
 };
 
+export const fetchUserExceptManagerRole = async() => {
+    return await User.find({ role: { $ne: 'Manager' } });
+}
+
 export const saveUserService = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -128,7 +132,7 @@ export const updateUserService = (data) => {
     })
 }
 
-export const fetchAllUserService = () => {
+export const fetchUsersService = () => {
     return new Promise(async (resolve, reject) => {
         try {
             let users = await User.find({}, { password: 0 })
@@ -150,9 +154,9 @@ export const handleLoginService = (username, password) => {
             let response = {}
             const userFromDB = await fetchUserByUsername(username);
             if (userFromDB) {
-                let isPasswordCorrect = await bcrypt.compareSync(password, userFromDB.password);
+                let isPasswordCorrect = bcrypt.compareSync(password, userFromDB.password);
                 if (isPasswordCorrect) {
-                    const role = await getRole(userFromDB);
+                    const role = userFromDB.role;
                     let user = {
                         ...userFromDB._doc,
                     };
@@ -176,11 +180,11 @@ export const handleLoginService = (username, password) => {
                 response.errCode = 2;
                 response.message = "User not found";
             }
-
             resolve(response)
         } catch (e) {
             reject(e)
         }
     })
 }
+
 

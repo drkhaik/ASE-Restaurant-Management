@@ -13,7 +13,7 @@ const orderDetailSchema = new Schema({
     quantity: { type: Number, required: true, min: 1 }                     
 }, {
     timestamps: true,          
-    collection: COLLECTION_NAME    
+    collection: COLLECTION_NAME
 });
 
 const OrderDetail = mongoose.model(DOCUMENT_NAME, orderDetailSchema);
