@@ -41,9 +41,10 @@
                             <button class="button-update">
                                 <a href="inventories/edit-inventory/<%= inventory.id %>" class="button-update">Update</a>
                             </button>
-                            <button class="button-delete">
-                                <a href="inventories/delete-inventory/<%= inventory.id %>" class="button-delete">Delete</a>
-                            </button>
+                            <form action="/inventories/delete-inventory/<%= inventory.id %>" method="POST">
+                                <button type="submit" class="button-delete">Delete</button>
+                            </form>
+                                                       
                         </td>
                     </tr>
                 <% }) %>
