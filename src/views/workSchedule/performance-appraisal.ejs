@@ -1,0 +1,60 @@
+<div class="container-form-add-user">
+    <div class="return-buttons">
+        <a href="/work-schedules">Return</a>
+    </div>
+    <div class="form-add-user">
+        <h3>
+            <%= title %>
+        </h3>
+        <form action="/work-schedules/performance-appraisal" method="POST">
+            <div>
+                <label for="user">User:</label>
+                <select id="user" name="user_id" required>
+                    <% users.forEach(user=> { %>
+                        <option value="<%= user._id %>">
+                            <%= user.name %>
+                        </option>
+                        <% }); %>
+                </select>
+            </div>
+            <div>
+                <label for="date">Date / Shift</label>
+                <select id="date" name="_id" required> </select>
+            </div>
+            <div>
+                <label for="performanceRating">Performance (Maximum 10):</label>
+                <input type="number" id="performanceRating" name="performance_score" min="1" max="10" required>
+            </div>
+            <div>
+                <label for="comments">Comment:</label>
+                <textarea id="comments" name="comments" rows="4" cols="50" placeholder="Write comment here..."></textarea>
+            </div>
+
+            <button type="submit">Submit</button>
+
+        </form>
+
+        <script>
+            document.getElementById('user').addEventListener('change', async function () {
+                const userId = this.value;
+
+                const response = await fetch(`/work-schedules/working-dates/${userId}`);
+                console.log("check response", response);
+                const workingDates = await response.json();
+
+                const dateSelect = document.getElementById('date');
+                dateSelect.innerHTML = '';
+
+                workingDates.forEach(schedule => {
+                    const option = document.createElement('option');
+                    option.value = schedule._id;
+                    option.textContent = schedule.formattedDate + " / " + schedule.shift;
+                    dateSelect.appendChild(option);
+                });
+
+                dateSelect.dispatchEvent(new Event('change'));
+            });
+        </script>
+    </div>
+    
+</div>

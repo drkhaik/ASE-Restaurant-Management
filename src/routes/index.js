@@ -1,5 +1,6 @@
 import Express from "express";
 import userRoute from './user.js';
+import workScheduleRoute from './workSchedule.js';
 import orderRoute from './order.js';
 import dishRoute from './dish.js';
 import paymentRoute from './payment.js'
@@ -13,6 +14,7 @@ const initApiRoutes = (app) => {
     });
     router.use('/users',userRoute);
     router.use('/orders',orderRoute);
+    router.use('/work-schedules', workScheduleRoute);
     router.use('/dishes',dishRoute);
     router.use('/payment', paymentRoute);
     router.use('/inventories', inventoryRoute);

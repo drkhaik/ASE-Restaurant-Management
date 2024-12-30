@@ -69,8 +69,7 @@ export const handleDeleteInventory = async (req, res) => {
     if (result.errCode === 0) {
         res.redirect('/inventories');
     } else {
-        res.status(400).render('inventory/manage-inventory', { title: 'Manage Inventory', error: result.message });
-    }
+        res.status(400).render('inventory/manage-inventory', { title: 'Manage Inventory', error: result.message });    }
 };
     // const Inven=[
     //     {

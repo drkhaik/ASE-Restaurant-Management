@@ -33,7 +33,7 @@
                             <%= user.email %>
                         </td>
                         <td>
-                            <%= user.status %>
+                            <%= user.status === 1 ? 'active' : 'unactive' %>
                         </td>
                         <td>
                             <%= user.role %>

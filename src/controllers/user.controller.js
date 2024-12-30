@@ -1,7 +1,7 @@
 import {
     handleLoginService,
     saveUserService,
-    fetchAllUserService,
+    fetchUsersService,
     getRolesService,
     fetchUserById,
     updateUserService
@@ -122,9 +122,9 @@ export const postUserUpdate = async (req, res, next) => {
     }
 }
 
-export const fetchAllUser = async (req, res) => {
+export const fetchUsers = async (req, res) => {
     try {
-        let response = await fetchAllUserService();
+        let response = await fetchUsersService();
         if (response.errCode === 0) {
             res.render('user/manage-user', { title: 'User Management', users: response.data });
         } else {
