@@ -17,7 +17,6 @@ from "../controllers/user.controller.js"
 router.get('/login', getUserLogin);
 router.post('/login', handleLogin);
 
-
 // add user
 router.get('/add-user', getUserCreate);
 router.post('/add-user', postUserCreate);

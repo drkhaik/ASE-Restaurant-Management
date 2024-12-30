@@ -1,6 +1,4 @@
-
 <div class="container-form-add-order">
-
     <div class="return-buttons">
         <a href="/orders">Return to Orders</a>
     </div>
@@ -12,41 +10,203 @@
             <!-- Staff In Charge -->
             <div>
                 <label for="staff_in_charge">Staff In Charge:</label>
-                <select id="staff_in_charge" name="staff_in_charge" required>
-                    <% users.forEach(user => { %>
-                        <option value="<%= user._id %>">
-                            <%= user.name %> - <%= user.role %>
-                        </option>
-                    <% }); %>
-                </select>
+                <input type="hidden" id="staff_in_charge" name="staff_in_charge" value="<%= user.id %>">
+                <input type="text" value="<%= user.name %>" disabled>
             </div>
-
-            <!-- Total Amount -->
-            <div>
-                <label for="total_amount">Total Amount ($):</label>
-                <input type="number" id="total_amount" name="total_amount" step="0.01" min="0" required>
-            </div>
+            
 
             <!-- Order Status -->
             <div>
                 <label for="status">Order Status:</label>
-                <select id="status" name="status" required>
-                    <option value="PENDING">PENDING</option>
+                <select id="status" name="status" disabled>
+                    <option value="PENDING" selected>PENDING</option>
                     <option value="DELIVERED">DELIVERED</option>
                     <option value="PAID">PAID</option>
                 </select>
             </div>
 
-            <!-- Order Details -->
+            <!-- Dish Selector -->
+            <div class="dish-selection">
+                <label for="dish_selector">Dish:</label>
+                <select id="dish_selector" required>
+                    <% Object.keys(groupedDishes).forEach(category => { %>
+                        <optgroup label="<%= category.charAt(0).toUpperCase() + category.slice(1) %>">
+                            <% groupedDishes[category].forEach(dish => { %>
+                                <option value="<%= dish._id %>" data-price="<%= dish.price %>">
+                                    <%= dish.name %>
+                                </option>
+                            <% }) %>
+                        </optgroup>
+                    <% }) %>
+                </select>
+                <button type="button" id="add_dish_button">Add</button>
+            </div>
 
+            <!-- Order Table (Initially Hidden) -->
+            <table id="order_table" style="display:none;" aria-required="true">
+                <thead>
+                    <tr>
+                        <th>Dish</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamically populated rows will go here -->
+                </tbody>
+            </table>
+
+            <!-- Hidden Input for Order Details -->
+            <input type="hidden" name="order_details" id="order_details">
+
+            <!-- Total Amount -->
+            <div>
+                <label for="total_amount">Total Amount ($):</label>
+                <input type="number" id="total_amount" name="total_amount" disabled>
+            </div>
 
             <!-- Submit Button -->
             <button type="submit">Submit Order</button>
         </form>
     </div>
-
 </div>
 
+<script>
+    let orderItems = [];
+    document.addEventListener("DOMContentLoaded", function () {
+        const dishSelector = document.getElementById("dish_selector");
+        const addDishButton = document.getElementById("add_dish_button");
+        const orderTable = document.getElementById("order_table");
+        const orderTableBody = orderTable.querySelector("tbody");
+        const totalAmountInput = document.getElementById("total_amount");
+        const orderDetailsInput = document.getElementById("order_details");
 
+        // Add dish to the order when "Add" is clicked
+        addDishButton.addEventListener("click", function () {
+            const selectedDish = dishSelector.options[dishSelector.selectedIndex];
+            const dishId = selectedDish.value;
+            const dishName = selectedDish.text;
+            const dishPrice = parseFloat(selectedDish.getAttribute("data-price"));
 
+            // Check if the dish is already in the order
+            const existingDish = orderItems.find(item => item.dishId === dishId);
+            if (existingDish) {
+                // If the dish is already in the order, increase its quantity
+                existingDish.quantity += 1;
+            } else {
+                // Otherwise, add a new item to the order
+                orderItems.push({
+                    dishId,
+                    dishName,
+                    dishPrice,
+                    quantity: 1
+                });
+            }
+
+            // Update the table and total amount
+            updateOrderTable();
+            updateTotalAmount();
+        });
+
+        // Function to update the order table
+        function updateOrderTable() {
+            // Clear the table body
+            orderTableBody.innerHTML = "";
+
+            // Populate the table with updated order items
+            orderItems.forEach(item => {
+                const row = document.createElement("tr");
+
+                const dishCell = document.createElement("td");
+                dishCell.textContent = item.dishName;
+                row.appendChild(dishCell);
+
+                const priceCell = document.createElement("td");
+                priceCell.textContent = `$${item.dishPrice.toFixed(2)}`;
+                row.appendChild(priceCell);
+
+                const quantityCell = document.createElement("td");
+                quantityCell.classList.add("quantity-cell");
+                const decreaseButton = document.createElement("button");
+                decreaseButton.textContent = "-";
+                const quantityInput = document.createElement("input");
+                quantityInput.type = "number";
+                quantityInput.value = item.quantity;
+                quantityInput.min = 0;
+                quantityInput.readOnly = true;
+                const increaseButton = document.createElement("button");
+                increaseButton.textContent = "+";
+                quantityCell.appendChild(decreaseButton);
+                quantityCell.appendChild(quantityInput);
+                quantityCell.appendChild(increaseButton);
+                row.appendChild(quantityCell);
+
+                const totalCell = document.createElement("td");
+                totalCell.textContent = `$${(item.dishPrice * item.quantity).toFixed(2)}`;
+                row.appendChild(totalCell);
+
+                // Attach event listeners for quantity buttons
+                decreaseButton.addEventListener("click", function () {
+                    if (item.quantity > 0) {
+                        item.quantity -= 1;
+                        if (item.quantity === 0) {
+                            removeItemFromOrder(item.dishId);
+                        }
+                        updateOrderTable();
+                        updateTotalAmount();
+                    }
+                });
+
+                increaseButton.addEventListener("click", function () {
+                    item.quantity += 1;
+                    updateOrderTable();
+                    updateTotalAmount();
+                });
+
+                orderTableBody.appendChild(row);
+            });
+
+            // Show the table if it's not visible
+            if (orderItems.length > 0) {
+                orderTable.style.display = "table";
+            } else {
+                orderTable.style.display = "none";
+            }
+        }
+
+        // Function to remove an item from the order
+        function removeItemFromOrder(dishId) {
+            orderItems = orderItems.filter(item => item.dishId !== dishId);
+            updateOrderTable();
+            updateTotalAmount();
+        }
+
+        // Function to update the total amount
+        function updateTotalAmount() {
+            const totalAmount = orderItems.reduce((total, item) => total + (item.dishPrice * item.quantity), 0);
+            totalAmountInput.value = totalAmount;
+
+            // Update hidden input for order details (You can adjust this to fit your needs)
+            orderDetailsInput.value = JSON.stringify(orderItems.map(item => ({
+                dishId: item.dishId,
+                quantity: item.quantity
+            })));
+        }
+    });
+
+    document.querySelector('form').addEventListener('submit', function (e) { // Capture the event object
+    if (orderItems.length === 0) {
+        e.preventDefault();  // Prevent the form from being submitted
+        alert('Please add at least one dish to the order.');
+        return;
+    }
+
+    // Enable disabled fields before submitting the form
+    document.getElementById('staff_in_charge').disabled = false;
+    document.getElementById('status').disabled = false;
+    document.getElementById('total_amount').disabled = false;
+});
+
+</script>
 

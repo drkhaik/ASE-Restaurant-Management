@@ -10,7 +10,7 @@ const COLLECTION_NAME = 'Dishes';
 const dishSchema = new Schema({
     name: { type: String , required: true, unique: true},
     description: { type: String, required: false },
-    price: { type: Schema.Types.Decimal128, required: true },
+    price: { type: Number, required: true },
     category: { type: String, enum: ['starter', 'main_dish', 'dessert'], required: true }
 }, {
     timestamps: true,          
