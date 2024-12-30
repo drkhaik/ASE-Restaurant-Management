@@ -1,0 +1,56 @@
+<div class="manage-table">
+    <h1>Table Service</h1>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="button-add">
+            <a href="tables/add-table">Add New Table</a>
+        </button>
+    </div>
+    
+    <!-- Table Row Structure -->
+    <div class="row">
+        <% if (tables && tables.length > 0) { %>
+            <% let columnCount = 0; %>
+            <% tables.forEach(table => { %>
+                <!-- Start a new row if column count reaches 4 -->
+                <% if (columnCount === 4) { %>
+                    </div><div class="row">
+                    <% columnCount = 0; %>
+                <% } %>
+                <div class="column">
+                    <div class="card">
+                        <h3><%= table.name %></h3>
+                        <p>Ordered:  
+                          <% if (table.details.length > 0) { %>
+                              <% if (table.order_time.hours > 0) { %>
+                                  <%= table.order_time.hours %> hrs <%= table.order_time.minutes %> mins ago
+                              <% } else { %>
+                                  <%= table.order_time.minutes %> minutes ago
+                              <% } %>
+                          <% } else { %>
+                            No Order Placed
+                          <% } %>
+                        </p>
+                        <p>Dishes: <%= table.details.length %></p>
+                        <span class="status status-<%= table.status.toLowerCase() %>">
+                            <%= table.status %>
+                        </span>
+                        <br>
+                        <a href="tables/table-details/<%= table._id %>" class="button-action">View Details</a>
+                    </div>
+                </div>
+                <% columnCount++; %>
+            <% }) %>
+        <% } else { %>
+            <!-- No Tables Found Message -->
+            <div class="column">
+                <div class="card">
+                    <h3>No Tables Available</h3>
+                    <p>No tables found in the system.</p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+  </div>
+  

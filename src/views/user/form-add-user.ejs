@@ -24,7 +24,7 @@
                 <input type="password" id="password" name="password" required>
             </div>
             <div>
-                <label for="role">Vai Trò:</label>
+                <label for="role">Role:</label>
                 <select id="role" name="role" required>
                     <% roles.forEach(role=> { %>
                         <option value="<%= role.name %>">
@@ -38,3 +38,5 @@
         </form>
     </div>
 </div>
+
+<script src="/js/order/add-order.js"></script>

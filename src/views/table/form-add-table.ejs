@@ -1,0 +1,28 @@
+<div class="container-form-add-table">
+    <div class="return-buttons">
+        <a href="/tables">Return to Tables</a>
+    </div>
+
+    <div class="form-add-table">
+        <h2><%= title %></h2>
+
+        <form action="/tables/add-table" method="POST">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status" required>
+                    <option value="AVAILABLE">Available</option>
+                    <option value="OCCUPIED">Occupied</option>
+                    <option value="RESERVED">Reserved</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</div>

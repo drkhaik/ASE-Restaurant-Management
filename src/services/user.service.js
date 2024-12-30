@@ -2,6 +2,9 @@ import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import Role from '../models/role.model.js';
 import _ from 'lodash';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config()
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -148,6 +151,15 @@ export const fetchUsersService = () => {
     })
 }
 
+
+// create json web token
+const maxAge = 3 * 24 * 60 * 60;
+const createToken = (payload) => {
+  return jwt.sign({ payload }, process.env.JWT_SECRET, {
+    expiresIn: maxAge
+  });
+};
+
 export const handleLoginService = (username, password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -163,14 +175,13 @@ export const handleLoginService = (username, password) => {
                     user.role = role.name;
                     delete user.password;
 
-                    // let payload = { user };
-                    // let token = createTokenJWT(payload);
+                    let payload = { id: user._id, name: user.name, role };
+                    let token = createToken(payload);
 
                     response.errCode = 0;
                     response.message = "Ok";
                     response.data = {
-                        // access_token: token,
-                        user,
+                        access_token: token
                     };
                 } else {
                     response.errCode = 3;
@@ -186,5 +197,6 @@ export const handleLoginService = (username, password) => {
         }
     })
 }
+
 
 

@@ -8,49 +8,38 @@ import {
 } from '../services/user.service.js';
 
 export const getUserLogin = async (req, res) => {
-    res.render('user/login', { title: 'Login Page' });
+    res.render('login',  { title: 'Login Page', layout: false });
 }
 
 export const handleLogin = async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
-
-    // Validate input parameters
     if (!username || !password) {
-        return res.status(400).json({
+        return res.status(200).json({
             errCode: 1,
             message: 'Missing input parameters!'
-        });
+        })
     }
-
     try {
-        let response = await handleLoginService(username, password);
-
-        // if (response?.data?.access_token) {
-        //     res.cookie("jwt", response.data.access_token, {
-        //         httpOnly: true,
-        //         maxAge: 60 * 60 * 1000, // 1 hour
-        //         secure: true,
-        //         sameSite: 'none'
-        //     });
-        // }
-
-        // Return the login response (e.g., invalid credentials)
-        // return res.status(200).json(response);
-
-        return res.redirect('/users')
-
+        let response = await handleLoginService(username, password)
+        if (response?.data?.access_token) {
+            res.cookie("jwt", response.data.access_token,
+                { httpOnly: true, maxAge: 60 * 60 * 1000, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+        }
+        return res.status(200).json(response);
     } catch (e) {
-        console.error("Login error:", e);
-
-        // Handle any unexpected errors
-        return res.status(500).json({
+        console.log("check e", e);
+        return res.status(200).json({
             errCode: -1,
-            message: 'An error occurred while processing the request.'
-        });
+            message: res.message,
+        })
     }
-};
+}
 
+export const handleLogout = (req, res) => {
+    res.cookie('jwt', '', {maxAge: 1});
+    res.redirect('login')
+}
 
 /*Get và post tạo user mới*/
 export const getUserCreate = async (req, res, next) => {

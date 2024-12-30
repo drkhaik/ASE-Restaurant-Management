@@ -1,0 +1,33 @@
+<div class="billing-container">
+    <div class="billing-header">
+      <h1>Invoice</h1>
+    </div>
+    <div class="billing-details">
+      <h2>Order ID: <%= payment._id %></h2>
+      <p>Staff in Charge: <span><%= payment.staff_in_charge.name %></span></p>
+      <p>Status: <span class="status"><%= payment.status %></span></p>
+      <p>Total Amount: <span>$<%= payment.total_amount.toFixed(2) %></span></p>
+      <p>Payment Method: <span><%= payment.paymentMethod %></span></p>
+    </div>
+  
+    <h3>Order Items</h3>
+    <div class="order-items">
+      <% payment.details.forEach((item) => { %>
+        <div class="item">
+          <p><strong>Dish:</strong> <%= item.dish.name %></p>
+          <p><strong>Price:</strong> $<%= item.dish.price.toFixed(2) %></p>
+          <p><strong>Quantity:</strong> <%= item.quantity %></p>
+          <p><strong>Subtotal:</strong> $<%= (item.dish.price * item.quantity).toFixed(2) %></p>
+        </div>
+      <% }); %>
+    </div>
+  
+    <div class="payment-summary">
+      <h3>Payment Summary</h3>
+      <p>Total Amount: <span>$<%= payment.total_amount.toFixed(2) %></span></p>
+      <p>Payment Method: <span><%= payment.paymentMethod %></span></p>
+    </div>
+  
+    <button class="print-bill" onclick="window.print()">Print Invoice</button>
+    <button class="back-to-orders" onclick="window.location.href='/orders'">Back to Orders</button>
+  </div>
