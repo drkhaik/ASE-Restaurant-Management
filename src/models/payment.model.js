@@ -8,10 +8,11 @@ const DOCUMENT_NAME = 'Payment';
 const COLLECTION_NAME = 'Payment';
 
 const paymentSchema = new Schema({
-    name: { type: String, trim: true, maxLength: 150 },
+    order_id: { type: Schema.Types.ObjectId, ref: 'Order', required: true },
     paymentMethod: { type: String, trim: true},
     totalPrice: {type: Number},
-    status: { type: String, enum: [0,1], default: 1}
+    order_time: {type: Object},
+    status: { type: String, enum: ['PENDING', 'DELIVERED', 'PAID'], default: 'PENDING' },
 }, {
     timestamps: true,
     collection: COLLECTION_NAME
