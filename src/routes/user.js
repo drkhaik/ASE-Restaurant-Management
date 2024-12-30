@@ -3,7 +3,7 @@
 import Express from "express";
 const router = Express.Router();
 import {
-    fetchAllUser,
+    fetchUsers,
     getUserCreate,
     postUserCreate,
     getUserEdit,
@@ -13,39 +13,19 @@ import {
 }
 from "../controllers/user.controller.js"
 
-const empSalary = [
-    {
-        name: "Sayan Ghosh",
-        salary: 37000
-    },
-    {
-        name: "Susmita Sahoo",
-        salary: 365000
-    },
-    {
-        name: "Nabonita Santra",
-        salary: 36000
-    },
-    {
-        name: "Anchit Ghosh",
-        salary: 30000
-    }
-]
-
 // login
 router.get('/login', getUserLogin);
 router.post('/login', handleLogin);
-
 
 // add user
 router.get('/add-user', getUserCreate);
 router.post('/add-user', postUserCreate);
 
 // get user
-router.get('/', fetchAllUser);
+router.get('/', fetchUsers);
 
 // update user
-router.get('/edit-user/:id', getUserEdit); // Thêm :id để nhận ID người dùng
+router.get('/edit-user/:id', getUserEdit);
 router.post('/update-user', postUserUpdate); 
 
 

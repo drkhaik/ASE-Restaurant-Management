@@ -1,0 +1,42 @@
+.schedule {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.schedule th, .schedule td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.schedule th {
+    background-color: #f2f2f2;
+}
+
+.schedule .shift {
+    background-color: #e0e0e0;
+}
+
+.schedule .shift:nth-child(2), .schedule .shift:nth-child(4), .schedule .shift:nth-child(7) {
+    background-color: #cfe2f3;
+}
+
+.schedule .shift:contains("OFF") {
+    background-color: #d9d9d9;
+}
+
+.header-flex{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.button-performance-appraisal {
+    background-color: #0397d6;
+}
+
+.button-performance-appraisal:hover {
+    background-color: #107dac;
+}

@@ -1,0 +1,87 @@
+<div class="manage-user">
+    <h1>
+        <%= title %>
+    </h1>
+    <div class="action-buttons">
+        <button class="button-add">
+            <a href="/work-schedules/add-work-schedule">Add/Update Schedule</a>
+        </button>
+    </div>
+    <table class="schedule" id="scheduleTable">
+        <thead>
+            <tr>
+                <th>Staff</th>
+                <% datesForTable.forEach(date=> { %>
+                    <th>
+                        <%= date %>
+                    </th>
+                    <% }); %>
+            </tr>
+        </thead>
+        <tbody>
+           
+        </tbody>
+    </table>
+    
+    <div class="header-flex">
+        <h3>
+            Performance
+        </h3>
+        <button class="button-performance-appraisal">
+            <a href="work-schedules/performance-appraisal">Performance Appraisal</a>
+        </button>
+    </div>
+    <table class="schedule-performance-table">
+            <thead>
+                <tr>
+                    <th>Staff</th>
+                    <th>Date</th>
+                    <th>Performance</th>
+                    <th>Comments</th>
+                    <!-- <th>Evaluator by</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                <% if (schedulePerformance && schedulePerformance.length> 0) { %>
+                    <% schedulePerformance.forEach(sp => { %>
+                        <tr>
+                            <td>
+                                <%= sp.user %>
+                            </td>
+                            <td>
+                                <%= sp.date %>
+                            </td>
+                            <td>
+                                <%= sp.performance_score %>
+                            </td>
+                            <td>
+                                <%= sp.comments %>
+                            </td>
+                            <!-- <td>
+                                <%= sp.evaluator_by %>
+                            </td> -->
+                        </tr>
+                    <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6">No Performance Appraisal found</td>
+                            </tr>
+                    <% } %>
+            </tbody>
+    </table>
+    
+    <script>
+        const formattedSchedule = <%-JSON.stringify(workSchedules)%>;
+
+        const tableBody = document.getElementById('scheduleTable').getElementsByTagName('tbody')[0];
+        console.log("check data formatted", formattedSchedule);
+        formattedSchedule.forEach(rowData => {
+            const row = tableBody.insertRow();
+            for (const key in rowData) {
+                const cell = row.insertCell();
+                cell.textContent = rowData[key];
+            }
+        });
+    </script>
+    
+</div>

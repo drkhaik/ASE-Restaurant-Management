@@ -6,6 +6,7 @@ const app = express();
 import initApiRoutes from "./routes/index.js";
 import { connectToDatabase } from './configs/config.mongoDB.js';
 import bodyParser from "body-parser";
+import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ app.use(expressLayouts);
 app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 app.use(express.json());
+app.use(cookieParser())
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));

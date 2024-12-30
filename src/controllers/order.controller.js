@@ -1,24 +1,43 @@
 import {
     saveOrderService,
-    fetchAllOrderService
+    fetchAllOrderService,
+    getDishesService,
+    fetchOrderWithDetailsById,
+    updateOrderService,
+    deleteOrderService
 } from '../services/order.service.js';
-
-// import { getUsersService } from '../services/user.service.js';
 
 /*Get và post tạo order mới*/
 export const getOrderCreate = async (req, res, next) => {
     try {
-        // let dishResponse = await getDishesService();
-        // if (userResponse.errCode === 0) {
-            res.render('./order/form-add-order', { title: 'Add new Order', dishes: {} });
-        // } else {
-        //     res.status(500).json({ message: userResponse.message });
-        // }
+        // Fetch dishes from your service
+        let dishResponse = await getDishesService();
+        
+        if (dishResponse.errCode === 0) {
+            // Group the dishes by category
+            const groupedDishes = dishResponse.data.reduce((acc, dish) => {
+                // Check if the category exists in the accumulator, otherwise create it
+                if (!acc[dish.category]) {
+                    acc[dish.category] = [];
+                }
+                // Push the dish into the corresponding category
+                acc[dish.category].push(dish);
+                return acc;
+            }, {});
+
+            // Render the page with grouped dishes
+            res.render('./order/form-add-order', {
+                title: 'Add new Order',
+                groupedDishes: groupedDishes // Pass grouped dishes to the template
+            });
+        } else {
+            res.status(500).json({ message: dishResponse.message });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).send('Sth went wrong...');
+        res.status(500).send('Something went wrong...');
     }
-}
+};
 
 export const postOrderCreate = async (req, res, next) => {
     try {
@@ -38,65 +57,83 @@ export const postOrderCreate = async (req, res, next) => {
     }
 }
 
-const sampleOrders = [
-    {
-        _id: 'ORD123',
-        staff_in_charge: { name: 'John Doe' },
-        total_amount: 50.75,
-        status: { name: 'PENDING' },
-        order_time: {hours: 0, minutes: 56},
-        details: [
-            {
-                dish: { name: 'Spaghetti Carbonara', price: 12.99 },
-                quantity: 2
-            },
-            {
-                dish: { name: 'Caesar Salad', price: 8.50 },
-                quantity: 1
-            },
-            {
-                dish: { name: 'Garlic Bread', price: 3.99 },
-                quantity: 3
+/*get và update order*/
+export const getOrderEdit = async (req, res, next) => {
+    try {
+        const orderId = req.params.id;
+        // Fetch the order with details
+        const orderResponse = await fetchOrderWithDetailsById(orderId);
+        // Check if the order was successfully fetched
+        if (orderResponse.errCode !== 0) {
+            return res.status(500).json({ message: 'Error retrieving order' });
+        }
+        // Fetch dishes from your service
+        const dishResponse = await getDishesService();
+        // Check if dishes were successfully fetched
+        if (dishResponse.errCode !== 0) {
+            return res.status(500).json({ message: dishResponse.message });
+        }
+        // Group the dishes by category
+        const groupedDishes = dishResponse.data.reduce((acc, dish) => {
+            if (!acc[dish.category]) {
+                acc[dish.category] = [];
             }
-        ]
-    },
-    {
-        _id: 'ORD124',
-        staff_in_charge: { name: 'Jane Smith' },
-        total_amount: 78.30,
-        status: { name: 'DELIVERED' },
-        order_time: {hours: 0, minutes: 15},
-        details: [
-            {
-                dish: { name: 'Chicken Alfredo', price: 15.50 },
-                quantity: 2
-            },
-            {
-                dish: { name: 'Mixed Grilled Vegetables', price: 5.99 },
-                quantity: 1
-            },
-            {
-                dish: { name: 'Tiramisu', price: 7.00 },
-                quantity: 2
-            }
-        ]
-    },
-    {
-        _id: 'ORD126',
-        staff_in_charge: { name: 'Lily Smith' },
-        total_amount: 78.30,
-        status: { name: 'PAID' },
-        order_time: {hours: 1, minutes: 56},
-        details: [    ]
-    },
-];
+            acc[dish.category].push(dish);
+            return acc;
+        }, {});
+        // Render the page with order details and grouped dishes
+        res.render('./order/form-edit-order', {
+            title: 'Update Order',
+            order: orderResponse.data,
+            groupedDishes: groupedDishes // Pass grouped dishes to the template
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Something went wrong...');
+    }
+};
 
+export const postOrderUpdate = async (req, res, next) => {
+    try {
+        console.log("check req.body update", req.body);
+        let updateResponse = await updateOrderService(req.body);
+        if (updateResponse.errCode === 0) {
+            return res.redirect('/orders');
+        } else {
+            return res.status(500).json({ message: updateResponse.message });
+        }
+    } catch (e) {
+        console.log("check e", e);
+        return res.status(200).json({
+            errCode: -1,
+            message: "Error from server...",
+        })
+    }
+}
+
+export const deleteOrder = async (req, res, next) => {
+    try {
+        const orderId = req.params.id;
+        const response = await deleteOrderService(orderId);
+        if (response.errCode === 0) {
+            return res.redirect('/orders');
+        } else {
+            return res.status(500).json({ message: response.message });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            errCode: -1,
+            message: "Error from server...",
+        });
+    }
+};
 
 export const fetchAllOrder = async (req, res) => {
     try {
         let response = await fetchAllOrderService();
         if (response.errCode === 0) {
-            res.render('order/manage-order', { title: 'Order Tracking', orders: sampleOrders });
+            res.render('order/manage-order', { title: 'Order Tracking', orders: response.data });
         } else {
             res.status(500).json({ message: response.message });
         }
