@@ -21,4 +21,5 @@ router.post('/pay-with-cash', payWithCash);
 
 // Hiển thị hóa đơn
 router.get('/bill/:id', getBill);
+
 export default router;

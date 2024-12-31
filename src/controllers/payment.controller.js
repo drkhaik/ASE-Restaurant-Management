@@ -3,7 +3,9 @@ import {
   createPayment, 
   getOrderDetails, 
   updatePaymentStatus, 
-  findPaymentById 
+  findPaymentById, 
+  createOrder,
+  zaloPaymentCallbackService
 } from '../services/payment.service.js';
 
 // Lấy thông tin hoặc tạo Payment
@@ -84,3 +86,33 @@ export const getBill = async (req, res) => {
     res.status(500).json({ message: 'Lỗi từ server!' });
   }
 };
+
+// Thanh toán với zalopay
+export const zaloPayment = async (req, res) => {
+  try {
+    const { amount, bankCode, items, user } = req.body
+    const orderInfo = { amount, bankCode, items, user }
+    // Gọi service để tạo order
+    const zaloPayResponse = await createOrder(orderInfo)
+    res.status(200).json({
+      message: 'Tạo đơn hàng thành công',
+      data: zaloPayResponse
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const zaloPaymentCallback = async (req, res) => {
+  try {
+    let dataStr = req.body.data
+    let reqMac = req.body.mac
+    const zaloPaycallBack = await zaloPaymentCallbackService(dataStr, reqMac)
+    res.status(200).json({
+      message: 'Đã thanh toán đơn hàng',
+      data: zaloPaycallBack
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
