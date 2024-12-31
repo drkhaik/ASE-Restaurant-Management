@@ -31,7 +31,10 @@
         <input type="hidden" name="orderId" value="<%= order._id %>" />
         <button type="submit" class="pay-now">Pay with cash</button>
       </form>
-          <button class="pay-now zalopay">Pay By Zalo</button>
+      <form action="/payment/zalopay" method="POST" id="payWithZaloPayForm">
+        <input type="hidden" name="orderInfo" value="<%= order._id %>" />
+        <button type="submit" class="pay-now zalopay">Pay with ZaloPay</button>
+      </form>
       <% }); %>
 
 </div>

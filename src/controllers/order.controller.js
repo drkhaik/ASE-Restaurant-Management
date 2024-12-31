@@ -132,6 +132,7 @@ export const deleteOrder = async (req, res, next) => {
 export const fetchAllOrder = async (req, res) => {
     try {
         let response = await fetchAllOrderService();
+        console.log(response.data)
         if (response.errCode === 0) {
             res.render('order/manage-order', { title: 'Order Tracking', orders: response.data });
         } else {

@@ -66,27 +66,35 @@ export const findPaymentById = async (paymentId) => {
 
 // Thanh toán với zaloPay
 const config = {
-  app_id: '2554',
-  key1: 'sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn',
-  key2: 'trMrHtvjo6myautxDUiAcYsVtaeQ8nhf',
+  app_id: '554',
+  key1: '8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn',
+  key2: 'uUfsWgfLkRLzq6W2uNXTCxrfxs51auny',
   endpoint: 'https://sb-openapi.zalopay.vn/v2/create'
 }
-export const createOrder = async (orderInfo) => {
+export const createOrder = async (findOrderDetail) => {
   const transID = Math.floor(Math.random() * 1000000)
   const embed_data = {
-    redirecturl: 'http://localhost:3000'
+    redirecturl: 'http://localhost:3000/users'
   }
+  const findOrder = await Order.findById(findOrderDetail.order_id)
   const order = {
     app_id: config.app_id,
-    app_trans_id: `${moment().format('YYMMDD')}_${transID}`, // translation missing: vi.docs.shared.sample_code.comments.app_trans_id
-    app_user: orderInfo.user,
-    app_time: Date.now(), // miliseconds
-    item: JSON.stringify(orderInfo.items),
+    app_trans_id: `${moment().format('YYMMDD')}_${transID}`,
+    app_user: findOrder.staff_in_charge.name,
+    app_time: Date.now(),
+    item: JSON.stringify([
+      {
+        item_id: findOrderDetail.dish_id._id,
+        item_name: findOrderDetail.dish_id.name,
+        item_price: Math.round(findOrderDetail.dish_id.price * 1000), // Chuyển sang đồng
+        item_quantity: findOrderDetail.quantity, // Hoặc lấy từ dữ liệu thực tế
+      },
+    ]),
     embed_data: JSON.stringify(embed_data),
-    amount: orderInfo.amount,
+    amount: findOrder.total_amount * 1000,
     description: `Lazada - Payment for the order #${transID}`,
-    bank_code: orderInfo.bankCode,
-    callback_url: 'https://76c4-2403-e200-179-5c2c-59de-fcbe-d5a-49ef.ngrok-free.app/api/payment/zalopay/callback'
+    bank_code: '',
+    callback_url: 'https://0625-2403-e200-179-5c2c-8580-2716-a047-e53e.ngrok-free.app/payment/zalopay/callback'
   }
   console.log(`App trans iD is ${moment().format('YYMMDD')}_${transID}`)
   const data =
@@ -113,30 +121,3 @@ export const createOrder = async (orderInfo) => {
   }
 }
 
-export const zaloPaymentCallbackService = async (dataStr, reqMac) => {
-  let result = {}
-  try {
-    let mac = CryptoJS.HmacSHA256(dataStr, config.key2).toString()
-    if (reqMac !== mac) {
-      // callback không hợp lệ
-      result.returncode = -1
-      result.returnmessage = 'mac not equal'
-    } else {
-      // thanh toán thành công
-      // merchant cập nhật trạng thái cho đơn hàng
-      let dataJson = JSON.parse(dataStr, config.key2)
-      // Lấy orderID từ order mới tạo
-      const orderId = JSON.parse(dataJson.item)
-      const orderUpdate = await Order.findByIdAndUpdate(orderId[0].orderId, { isPaid: true }, { new: true })
-      console.log(orderUpdate)
-      console.log("update order's status = success where app_trans_id =", dataJson['app_trans_id'])
-      result.return_code = 1
-      result.return_message = 'success'
-    }
-  } catch (ex) {
-    result.return_code = 0 // ZaloPay server sẽ callback lại (tối đa 3 lần)
-    result.return_message = ex.message
-  }
-  // thông báo kết quả cho ZaloPay server
-  return result
-}
