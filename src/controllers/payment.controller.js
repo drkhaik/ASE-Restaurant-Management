@@ -59,10 +59,10 @@ export const payWithCash = async (req, res) => {
 
 // Hiển thị hóa đơn
 export const getBill = async (req, res) => {
-  const { orderId } = req.body;
+  const {id} = req.params;
   try {
     const payment = await findPaymentById(id);
-
+    console.log(payment)
     if (!payment) {
       return res.status(404).json({ message: 'Không tìm thấy Payment!' });
     }
@@ -73,6 +73,7 @@ export const getBill = async (req, res) => {
       title: 'Hóa Đơn',
       payment: {
         ...order,
+        status: payment.status,
         paymentMethod: payment.paymentMethod,
       },
     });
