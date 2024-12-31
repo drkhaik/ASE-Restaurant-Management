@@ -15,6 +15,9 @@ const router = Express.Router();
 const initApiRoutes = (app) => {
     router.use('*', checkUser)
     router.use(authRoute)
+    router.get('/',(req, res) => {
+        res.redirect('/dashboard');
+    });
     router.get('/dashboard', requireAuth, (req, res) => {
         res.render('index', { title: 'Home Page' });
     });

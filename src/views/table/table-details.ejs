@@ -50,6 +50,9 @@
                                 </td>
                                 <td class="total-cell">$<%= (detail.dish_id.price * detail.quantity).toFixed(2) %></td>
                             </tr>
+                            <tr class="no-orders" style="display: none;">
+                                <td colspan="4">No order placed</td>
+                            </tr>
                         <% }) %>
                     <% }else{ %>
                     <!-- "No orders placed" message, hidden when orders are added -->
@@ -60,9 +63,15 @@
                 </tbody>
             </table>
             <% if (!table.currentOrder._id && table.currentOrder.order_details.length === 0) { %>
-            <div class="form-group">
-                <a href="javascript:void(0);" class="add-order-button">Add Order</a>
-            </div>
+                <div class="form-group">
+                    <a href="javascript:void(0);" class="add-order-button" style="display: inline-block;">Add Order</a>
+                    <a href="javascript:void(0);" class="remove-order-button" style="display: none;">Remove Order</a>
+                </div> 
+            <% }else{ %>
+                <div class="form-group">
+                    <a href="javascript:void(0);" class="add-order-button" style="display: none;">Add Order</a>
+                    <a href="javascript:void(0);" class="remove-order-button" style="display: inline-block;">Remove Order</a>
+                </div> 
             <% } %>
             <!-- Total Amount -->
             <div>
@@ -124,256 +133,271 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    const modal = document.getElementById("miniOrderModal");
-    const closeModal = document.getElementById("closeMiniOrderModal");
-    const dishSelector = document.getElementById("mini_dish_selector");
-    const addDishButton = document.getElementById("mini_add_dish_button");
-    const miniOrderTable = document.getElementById("mini_order_table");
-    const miniOrderTableBody = miniOrderTable.querySelector("tbody");
-    const totalAmountInput = document.getElementById("mini_total_amount");
-    const mainOrderTable = document.getElementById("table_table");
-    const mainOrderTableBody = mainOrderTable.querySelector("tbody");
-    const submitOrderButton = document.getElementById("submitMiniOrder");
-    const submitTableButton = document.querySelector('.submit-button'); // Submit button for the form
-    const orderDataInput = document.getElementById('order_data'); // Hidden input for order data
-    const staffInChargeInput = document.getElementById('staff_in_charge'); // Staff in charge input field
-    const totalAmountMainScreen = document.getElementById("total_amount"); // Total amount on the main screen
-    const addOrderButton = document.querySelector('.add-order-button');
+        const modal = document.getElementById("miniOrderModal");
+        const closeModal = document.getElementById("closeMiniOrderModal");
+        const dishSelector = document.getElementById("mini_dish_selector");
+        const addDishButton = document.getElementById("mini_add_dish_button");
+        const miniOrderTable = document.getElementById("mini_order_table");
+        const miniOrderTableBody = miniOrderTable.querySelector("tbody");
+        const totalAmountInput = document.getElementById("mini_total_amount");
+        const mainOrderTable = document.getElementById("table_table");
+        const mainOrderTableBody = mainOrderTable.querySelector("tbody");
+        const submitOrderButton = document.getElementById("submitMiniOrder");
+        const submitTableButton = document.querySelector('.submit-button');
+        const orderDataInput = document.getElementById('order_data');
+        const staffInChargeInput = document.getElementById('staff_in_charge');
+        const totalAmountMainScreen = document.getElementById("total_amount");
+        const addOrderButton = document.querySelector('.add-order-button');
+        const removeOrderButton = document.querySelector('.remove-order-button');
+        const orderTable = document.getElementById("table_table");
+        const statusDropdown = document.getElementById("status");
 
-    let orderItems = [];
+        let orderItems = [];
 
-    // Show the modal when the "Add Order" button is clicked
-    addOrderButton.addEventListener("click", function (event) {
-        event.preventDefault();
-        modal.style.display = "block";
-    });
+    // Function to toggle visibility based on status
+    function updateVisibilityBasedOnStatus() {
+        const status = statusDropdown.value;
+        if (status === "OCCUPIED" || status === "RESERVED") {
+            // Show order table and buttons
+            orderTable.style.display = "table";
+            addOrderButton.style.display = "inline-block";
+            removeOrderButton.style.display = "none"; // Initially, show only the Add Order button
+        } else {
+            // Hide order table and buttons
+            orderTable.style.display = "none";
+            addOrderButton.style.display = "none";
+            removeOrderButton.style.display = "none";
+        }
+    }
 
-    // Close the modal when clicking the close button or outside the modal
-    closeModal.onclick = function () {
-        modal.style.display = "none";
-    };
-    window.onclick = function (event) {
-        if (event.target == modal) {
+    // Update visibility on page load
+    updateVisibilityBasedOnStatus();
+
+    // Add event listener for dropdown change
+    statusDropdown.addEventListener("change", updateVisibilityBasedOnStatus);
+
+        // Show the modal when the "Add Order" button is clicked
+        addOrderButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            modal.style.display = "block";
+        });
+
+        // Close the modal when clicking the close button or outside the modal
+        closeModal.onclick = function () {
             modal.style.display = "none";
-        }
-    };
-
-    // Add a dish to the mini order table when the "Add" button is clicked
-    addDishButton.addEventListener("click", function () {
-        const selectedDish = dishSelector.options[dishSelector.selectedIndex];
-        const dishId = selectedDish.value;
-        const dishName = selectedDish.text;
-        const dishPrice = parseFloat(selectedDish.getAttribute("data-price"));
-
-        // Check if the dish is already in the order (in the modal)
-        const existingDish = orderItems.find(item => item.dishId === dishId);
-        if (existingDish) {
-            existingDish.quantity += 1;
-        } else {
-            orderItems.push({
-                dishId,
-                dishName,
-                dishPrice,
-                quantity: 1
-            });
-        }
-        updateMiniOrderTable();
-    });
-
-    // Update the mini order table when a dish is added
-    function updateMiniOrderTable() {
-        miniOrderTableBody.innerHTML = "";
-
-        orderItems.forEach(item => {
-            const row = document.createElement("tr");
-
-            const dishCell = document.createElement("td");
-            dishCell.textContent = item.dishName;
-            row.appendChild(dishCell);
-
-            const priceCell = document.createElement("td");
-            priceCell.textContent = `$${item.dishPrice.toFixed(2)}`;
-            row.appendChild(priceCell);
-
-            const quantityCell = document.createElement("td");
-            quantityCell.textContent = item.quantity;
-            row.appendChild(quantityCell);
-
-            const totalCell = document.createElement("td");
-            totalCell.textContent = `$${(item.dishPrice * item.quantity).toFixed(2)}`;
-            row.appendChild(totalCell);
-
-            const actionsCell = document.createElement("td");
-            const removeButton = document.createElement("button");
-            removeButton.textContent = "Remove";
-            removeButton.addEventListener("click", function () {
-                removeMiniOrderItem(item.dishId);
-            });
-            actionsCell.appendChild(removeButton);
-            row.appendChild(actionsCell);
-
-            miniOrderTableBody.appendChild(row);
-        });
-
-        miniOrderTable.style.display = orderItems.length > 0 ? "table" : "none";
-        updateTotalAmount();
-    }
-
-    // Update the total amount in the mini order table
-    function updateTotalAmount() {
-        const totalAmount = orderItems.reduce((total, item) => total + item.dishPrice * item.quantity, 0);
-        totalAmountInput.value = totalAmount.toFixed(2);
-    }
-
-    // Remove an item from the mini order table
-    function removeMiniOrderItem(dishId) {
-        orderItems = orderItems.filter(item => item.dishId !== dishId);
-        updateMiniOrderTable();
-    }
-
-// Transfer items to the main order table
-function transferToMainOrderTable() {
-    let totalAmount = 0; // Initialize total amount
-
-    orderItems.forEach(item => {
-        const existingRow = Array.from(mainOrderTableBody.querySelectorAll("tr")).find(
-            row => row.dataset.dishId === item.dishId
-        );
-
-        if (existingRow) {
-            // Update quantity and total for existing item
-            const quantityCell = existingRow.querySelector(".quantity-input");
-            const totalCell = existingRow.querySelector(".total-cell");
-
-            const currentQuantity = parseInt(quantityCell.value, 10);
-            const newQuantity = currentQuantity + item.quantity;
-
-            quantityCell.value = newQuantity;
-            totalCell.textContent = `$${(newQuantity * item.dishPrice).toFixed(2)}`;
-        } else {
-            // Add new row for the new item
-            const newRow = document.createElement("tr");
-            newRow.dataset.dishId = item.dishId;
-
-            const dishCell = document.createElement("td");
-            dishCell.textContent = item.dishName;
-            newRow.appendChild(dishCell);
-
-            const priceCell = document.createElement("td");
-            priceCell.textContent = `$${item.dishPrice.toFixed(2)}`;
-            newRow.appendChild(priceCell);
-
-            const quantityCell = document.createElement("td");
-            const quantityInput = document.createElement("input");
-            quantityInput.type = "number";
-            quantityInput.className = "quantity-input";
-            quantityInput.step = "1";
-            quantityInput.value = item.quantity;
-            quantityInput.min = "0";
-            quantityInput.disabled = true; // Disable the input directly here
-            quantityCell.appendChild(quantityInput);
-            newRow.appendChild(quantityCell);
-
-            const totalCell = document.createElement("td");
-            totalCell.className = "total-cell";
-            totalCell.textContent = `$${(item.dishPrice * item.quantity).toFixed(2)}`;
-            newRow.appendChild(totalCell);
-
-            mainOrderTableBody.appendChild(newRow);
-        }
-
-        // Accumulate total amount
-        totalAmount += item.dishPrice * item.quantity;
-    });
-
-    // Hide "No order placed" row if there are items
-    toggleNoOrdersRow();
-
-    // Reset the mini order table and close the modal
-    orderItems = []
-    updateMiniOrderTable();
-    modal.style.display = "none";
-
-    // Hide "Add Order" button
-    addOrderButton.style.display = "none";
-
-    // Update the total amount on the main screen
-    totalAmountMainScreen.value = totalAmount.toFixed(2); // Update the total amount in the main screen
-}
-
-    // Function to toggle the "No orders placed" row visibility
-    function toggleNoOrdersRow() {
-        const noOrdersRow = mainOrderTableBody.querySelector(".no-orders");
-        if (orderItems.length > 0) {
-            noOrdersRow.style.display = "none";
-        } else {
-            noOrdersRow.style.display = "table-row";
-        }
-    }
-
-    // Handle "Submit Order" button click
-    submitOrderButton.addEventListener("click", function () {
-        if (orderItems.length === 0) {
-            alert("Please add at least one dish to the order.");
-            return;
-        }
-
-        transferToMainOrderTable();
-    });
-
-// Submit the main order table data through POST method when the form is submitted
-submitTableButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    let orderItemsOnMain = [];
-    // Loop through each row in the order table
-    const rows = mainOrderTableBody.querySelectorAll("tr");
-    rows.forEach(row => {
-        // Skip the "No orders placed" row
-        if (row.classList.contains("no-orders")) {
-            return;
-        }
-        const dishId = row.dataset.dishId;
-        const dishName = row.querySelector("td:nth-child(1)").textContent;  // Dish name
-        const dishPrice = parseFloat(row.querySelector("td:nth-child(2)").textContent.replace("$", "")); // Price
-        const quantity = parseInt(row.querySelector(".quantity-input").value, 10);  // Quantity
-        const total = parseFloat(row.querySelector(".total-cell").textContent.replace("$", "")); // Total
-
-        orderItemsOnMain.push({
-            dishId,
-            dishName,
-            dishPrice,
-            quantity,
-            total
-        });
-    });
-
-
-    // Get the staff in charge value from the input field
-    const staffInCharge = staffInChargeInput.value;
-
-    // Prepare the order data for the currentOrder field
-    const orderDetails = orderItemsOnMain.map(item => ({
-        dishId: item.dishId,
-        quantity: item.quantity
-    }));
-
-    const totalAmount = orderItemsOnMain.reduce((total, item) => total + item.dishPrice * item.quantity, 0);
-
-    // Create the order data object
-    if (orderItemsOnMain.length !== 0) {
-            const orderData = {
-            staff_in_charge: staffInCharge,
-            status: 'PENDING',
-            order_details: JSON.stringify(orderDetails),
-            total_amount: totalAmount.toFixed(2)  // Ensure it's a string with two decimal points
         };
-        orderDataInput.value = JSON.stringify(orderData); 
-    }
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
 
-    // Submit the form
-    document.querySelector("form").submit();
-});
+        // Handle "Remove Order" button click
+        removeOrderButton.addEventListener("click", function () {
+            const rows = mainOrderTableBody.querySelectorAll("tr:not(.no-orders)");
+            rows.forEach(row => row.remove());
+            totalAmountMainScreen.value = "0.00";
+            toggleNoOrdersRow();
 
+            addOrderButton.style.display = "inline-block";
+            removeOrderButton.style.display = "none";
+        });
 
-});
+        // Add a dish to the mini order table when the "Add" button is clicked
+        addDishButton.addEventListener("click", function () {
+            const selectedDish = dishSelector.options[dishSelector.selectedIndex];
+            const dishId = selectedDish.value;
+            const dishName = selectedDish.text;
+            const dishPrice = parseFloat(selectedDish.getAttribute("data-price"));
+
+            // Check if the dish is already in the order (in the modal)
+            const existingDish = orderItems.find(item => item.dishId === dishId);
+            if (existingDish) {
+                existingDish.quantity += 1;
+            } else {
+                orderItems.push({
+                    dishId,
+                    dishName,
+                    dishPrice,
+                    quantity: 1
+                });
+            }
+            updateMiniOrderTable();
+        });
+
+        // Update the mini order table when a dish is added
+        function updateMiniOrderTable() {
+            miniOrderTableBody.innerHTML = "";
+
+            orderItems.forEach(item => {
+                const row = document.createElement("tr");
+
+                const dishCell = document.createElement("td");
+                dishCell.textContent = item.dishName;
+                row.appendChild(dishCell);
+
+                const priceCell = document.createElement("td");
+                priceCell.textContent = `$${item.dishPrice.toFixed(2)}`;
+                row.appendChild(priceCell);
+
+                const quantityCell = document.createElement("td");
+                quantityCell.textContent = item.quantity;
+                row.appendChild(quantityCell);
+
+                const totalCell = document.createElement("td");
+                totalCell.textContent = `$${(item.dishPrice * item.quantity).toFixed(2)}`;
+                row.appendChild(totalCell);
+
+                const actionsCell = document.createElement("td");
+                const removeButton = document.createElement("button");
+                removeButton.textContent = "Remove";
+                removeButton.addEventListener("click", function () {
+                    removeMiniOrderItem(item.dishId);
+                });
+                actionsCell.appendChild(removeButton);
+                row.appendChild(actionsCell);
+
+                miniOrderTableBody.appendChild(row);
+            });
+
+            miniOrderTable.style.display = orderItems.length > 0 ? "table" : "none";
+            updateTotalAmount();
+        }
+
+        // Update the total amount in the mini order table
+        function updateTotalAmount() {
+            const totalAmount = orderItems.reduce((total, item) => total + item.dishPrice * item.quantity, 0);
+            totalAmountInput.value = totalAmount.toFixed(2);
+        }
+
+        // Remove an item from the mini order table
+        function removeMiniOrderItem(dishId) {
+            orderItems = orderItems.filter(item => item.dishId !== dishId);
+            updateMiniOrderTable();
+        }
+
+        // Transfer items to the main order table
+        function transferToMainOrderTable() {
+            let totalAmount = 0;
+
+            orderItems.forEach(item => {
+                const existingRow = Array.from(mainOrderTableBody.querySelectorAll("tr")).find(
+                    row => row.dataset.dishId === item.dishId
+                );
+
+                if (existingRow) {
+                    const quantityCell = existingRow.querySelector(".quantity-input");
+                    const totalCell = existingRow.querySelector(".total-cell");
+
+                    const currentQuantity = parseInt(quantityCell.value, 10);
+                    const newQuantity = currentQuantity + item.quantity;
+
+                    quantityCell.value = newQuantity;
+                    totalCell.textContent = `$${(newQuantity * item.dishPrice).toFixed(2)}`;
+                } else {
+                    const newRow = document.createElement("tr");
+                    newRow.dataset.dishId = item.dishId;
+
+                    const dishCell = document.createElement("td");
+                    dishCell.textContent = item.dishName;
+                    newRow.appendChild(dishCell);
+
+                    const priceCell = document.createElement("td");
+                    priceCell.textContent = `$${item.dishPrice.toFixed(2)}`;
+                    newRow.appendChild(priceCell);
+
+                    const quantityCell = document.createElement("td");
+                    const quantityInput = document.createElement("input");
+                    quantityInput.type = "number";
+                    quantityInput.className = "quantity-input";
+                    quantityInput.step = "1";
+                    quantityInput.value = item.quantity;
+                    quantityInput.min = "0";
+                    quantityInput.disabled = true;
+                    quantityCell.appendChild(quantityInput);
+                    newRow.appendChild(quantityCell);
+
+                    const totalCell = document.createElement("td");
+                    totalCell.className = "total-cell";
+                    totalCell.textContent = `$${(item.dishPrice * item.quantity).toFixed(2)}`;
+                    newRow.appendChild(totalCell);
+
+                    mainOrderTableBody.appendChild(newRow);
+                }
+
+                totalAmount += item.dishPrice * item.quantity;
+            });
+
+            toggleNoOrdersRow();
+
+            orderItems = [];
+            updateMiniOrderTable();
+            modal.style.display = "none";
+
+            addOrderButton.style.display = "none";
+            removeOrderButton.style.display = "inline-block";
+
+            totalAmountMainScreen.value = totalAmount.toFixed(2);
+        }
+
+        // Toggle "No orders placed" row visibility
+        function toggleNoOrdersRow() {
+            const noOrdersRow = mainOrderTableBody.querySelector(".no-orders");
+            const hasOrders = mainOrderTableBody.querySelectorAll("tr:not(.no-orders)").length > 0;
+
+            noOrdersRow.style.display = hasOrders ? "none" : "table-row";
+        }
+
+        // Handle "Submit Order" button click
+        submitOrderButton.addEventListener("click", function () {
+            if (orderItems.length === 0) {
+                alert("Please add at least one dish to the order.");
+                return;
+            }
+            transferToMainOrderTable();
+        });
+
+        // Submit the main order table data through POST method when the form is submitted
+        submitTableButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            let orderItemsOnMain = [];
+            const rows = mainOrderTableBody.querySelectorAll("tr:not(.no-orders)");
+            rows.forEach(row => {
+                const dishId = row.dataset.dishId;
+                const dishName = row.querySelector("td:nth-child(1)").textContent;
+                const dishPrice = parseFloat(row.querySelector("td:nth-child(2)").textContent.replace("$", ""));
+                const quantity = parseInt(row.querySelector(".quantity-input").value, 10);
+                const total = parseFloat(row.querySelector(".total-cell").textContent.replace("$", ""));
+
+                orderItemsOnMain.push({
+                    dishId,
+                    dishName,
+                    dishPrice,
+                    quantity,
+                    total
+                });
+            });
+
+            const staffInCharge = staffInChargeInput.value;
+            const orderDetails = orderItemsOnMain.map(item => ({
+                dishId: item.dishId,
+                quantity: item.quantity
+            }));
+            const totalAmount = orderItemsOnMain.reduce((total, item) => total + item.dishPrice * item.quantity, 0);
+
+            if (orderItemsOnMain.length !== 0) {
+                const orderData = {
+                    staff_in_charge: staffInCharge,
+                    status: 'PENDING',
+                    order_details: JSON.stringify(orderDetails),
+                    total_amount: totalAmount.toFixed(2)
+                };
+                orderDataInput.value = JSON.stringify(orderData);
+            }
+
+            document.querySelector("form").submit();
+        });
+
+        toggleNoOrdersRow(); // Initialize "No orders" row state
+    });
 </script>

@@ -1,7 +1,6 @@
 'use strict';
 
 import Express from "express";
-const router = Express.Router();
 import {
     fetchUsers,
     getUserCreate,
@@ -10,23 +9,24 @@ import {
     postUserUpdate,
     getUserLogin,
     handleLogin
-}
-from "../controllers/user.controller.js"
+} from "../controllers/user.controller.js";
+import { checkPermission } from '../middleware/roleMiddleware.js';
+
+const router = Express.Router();
 
 // login
 router.get('/login', getUserLogin);
 router.post('/login', handleLogin);
 
-// add user
-router.get('/add-user', getUserCreate);
-router.post('/add-user', postUserCreate);
+// Add user
+router.get('/add-user', checkPermission("manage_staff"), getUserCreate);
+router.post('/add-user', checkPermission("manage_staff"), postUserCreate);
 
-// get user
-router.get('/', fetchUsers);
+// Get users
+router.get('/', checkPermission("view_staff"), fetchUsers);
 
-// update user
-router.get('/edit-user/:id', getUserEdit);
-router.post('/update-user', postUserUpdate); 
-
+// Update user
+router.get('/edit-user/:id', checkPermission("manage_staff"), getUserEdit);
+router.post('/update-user', checkPermission("manage_staff"), postUserUpdate);
 
 export default router;

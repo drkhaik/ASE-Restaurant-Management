@@ -39,7 +39,7 @@ export const saveUserService = (data) => {
             } else {
                 console.log("check data", data);
                 let hashPasswordFromBcrypt = await hashUserPassword(data.password);
-                await User.create({
+                const newUser = await User.create({
                     name: data.name,
                     username: data.username,
                     email: data.email,
@@ -49,6 +49,7 @@ export const saveUserService = (data) => {
                     updatedAt: new Date()
                 })
                 resolve({
+                    newUser,
                     errCode: 0,
                     message: "OK",
                 })

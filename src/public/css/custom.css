@@ -1458,6 +1458,26 @@ select {
   background-color: #0056b3;
 }
 
+/* Remove Order Button */
+.remove-order-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff1e00;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 4px;
+  width: auto;  /* Make the button width auto for a shorter button */
+  margin-bottom: 15px;
+  margin-left: auto; /* Push the button to the right */
+  transition: background-color 0.3s ease;
+}
+
+.remove-order-button:hover {
+  background-color: #b74e07;
+}
+
 /* Submit Button */
 .submit-button {
   width: 100%;

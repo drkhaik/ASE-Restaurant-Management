@@ -1,7 +1,6 @@
 'use strict';
 
 import Express from "express";
-const router = Express.Router();
 import {
     fetchAllOrder,
     getOrderCreate,
@@ -9,21 +8,23 @@ import {
     getOrderEdit,
     postOrderUpdate,
     deleteOrder
-}
-from "../controllers/order.controller.js"
+} from "../controllers/order.controller.js";
+import { checkPermission } from '../middleware/roleMiddleware.js';
+
+const router = Express.Router();
 
 // Add order
-router.get('/add-order', getOrderCreate);
-router.post('/add-order', postOrderCreate);
+router.get('/add-order', checkPermission("manage_orders"), getOrderCreate);
+router.post('/add-order', checkPermission("manage_orders"), postOrderCreate);
 
-// Get order
-router.get('/', fetchAllOrder);
+// Get orders
+router.get('/', checkPermission("view_orders"), fetchAllOrder);
 
 // Update order
-router.get('/edit-order/:id', getOrderEdit);
-router.post('/update-order', postOrderUpdate); 
+router.get('/edit-order/:id', checkPermission("manage_orders"), getOrderEdit);
+router.post('/update-order', checkPermission("manage_orders"), postOrderUpdate);
 
 // Delete order
-router.get('/:id', deleteOrder);
+router.get('/:id', checkPermission("manage_orders"), deleteOrder);
 
 export default router;

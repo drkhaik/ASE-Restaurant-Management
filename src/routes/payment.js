@@ -1,17 +1,19 @@
 'use strict';
 
 import Express from "express";
-import {getBill, getPaymentInfo, payWithCash, zaloPayment} from "../controllers/payment.controller.js"
+import { getBill, getPaymentInfo, payWithCash, zaloPayment } from "../controllers/payment.controller.js";
+import { checkPermission } from '../middleware/roleMiddleware.js';
+
 const router = Express.Router();
 
-// Hiển thị Payment hoặc tạo mới
-router.get('/order-detail-pay/:id', getPaymentInfo);
+// Display Payment info
+router.get('/order-detail-pay/:id', checkPermission("manage_payments"), getPaymentInfo);
 
-// Thanh toán bằng tiền mặt
-router.post('/pay-with-cash', payWithCash);
+// Process payment with cash
+router.post('/pay-with-cash', checkPermission("manage_payments"), payWithCash);
 
-// Hiển thị hóa đơn
-router.get('/bill/:id', getBill);
+// Display Bill
+router.get('/bill/:id', checkPermission("manage_payments"), getBill);
 
-router.post('/zalopay', zaloPayment)
+router.post('/zalopay', checkPermission("manage_payments"),zaloPayment)
 export default router;
