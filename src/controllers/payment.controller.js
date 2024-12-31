@@ -3,20 +3,20 @@ import {
   createPayment, 
   getOrderDetails, 
   updatePaymentStatus, 
-  findPaymentById 
+  findPaymentById, 
+  createOrder
 } from '../services/payment.service.js';
-
+import Order from "../models/order.model.js"
+import OrderDetail from '../models/orderDetail.model.js';
 // Lấy thông tin hoặc tạo Payment
 export const getPaymentInfo = async (req, res) => {
   const { id } = req.params;
   try {
     // Kiểm tra nếu Payment đã tồn tại
     let payment = await findPaymentByOrderId(id);
-    console.log(payment)
     // Nếu chưa tồn tại, tạo mới
     if (!payment) {
       const order = await getOrderDetails(id);
-      console.log("Đay là order ", order)
       payment = await createPayment(order, 'paywithcash');
       // Gắn dữ liệu của order vào payment để render
       payment = {
@@ -30,7 +30,6 @@ export const getPaymentInfo = async (req, res) => {
         paymentMethod: payment.paymentMethod,
       };
     }
-    console.log("Orders", payment)
     // Render giao diện
     res.render('payment/form-payment', {
       title: 'Payment',
@@ -45,11 +44,9 @@ export const getPaymentInfo = async (req, res) => {
 // Thanh toán bằng tiền mặt
 export const payWithCash = async (req, res) => {
   const { orderId } = req.body;
-  console.log(orderId, "Hello")
   try {
     const updatedPayment = await updatePaymentStatus(orderId, 'cash', 'PAID');
     if (!updatedPayment) {
-      console.log(updatedPayment)
       return res.status(404).json({ message: 'Không tìm thấy Payment!' });
     }
 
@@ -62,7 +59,7 @@ export const payWithCash = async (req, res) => {
 
 // Hiển thị hóa đơn
 export const getBill = async (req, res) => {
-  const { id } = req.params;
+  const { orderId } = req.body;
   try {
     const payment = await findPaymentById(id);
 
@@ -84,3 +81,26 @@ export const getBill = async (req, res) => {
     res.status(500).json({ message: 'Lỗi từ server!' });
   }
 };
+
+// Thanh toán với zalopay
+export const zaloPayment = async (req, res) => {
+  try {
+    const findOrderDetail = await OrderDetail.find({order_id: req.body.orderInfo}).populate('dish_id');
+    const zaloPayResponse = await createOrder(findOrderDetail[0])
+    if (zaloPayResponse.return_code === 1) {
+      const updatedPayment = await updatePaymentStatus(req.body.orderInfo, 'zalopay', 'PAID');
+      if (!updatedPayment) {
+        return res.status(404).json({ message: 'Không tìm thấy Payment!' });
+      }
+      // Chuyển hướng đến URL thanh toán
+      return res.redirect(zaloPayResponse.order_url);
+    }
+
+    res.status(400).json({
+      message: zaloPayResponse.return_message || 'Giao dịch không thành công',
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+

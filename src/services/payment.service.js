@@ -4,6 +4,9 @@ import OrderDetail from '../models/orderDetail.model.js';
 import Dish from '../models/dish.model.js';
 import mongoose from 'mongoose';
 
+import axios from 'axios';
+import CryptoJS from 'crypto-js';
+import moment from 'moment';
 // Tìm Payment theo order_id
 export const findPaymentByOrderId = async (orderId) => {
   return await Payment.findOne({ order_id: orderId });
@@ -60,3 +63,61 @@ export const updatePaymentStatus = async (orderId, method, status) => {
 export const findPaymentById = async (paymentId) => {
   return await Payment.findById(paymentId).populate('order_id');
 };
+
+// Thanh toán với zaloPay
+const config = {
+  app_id: '554',
+  key1: '8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn',
+  key2: 'uUfsWgfLkRLzq6W2uNXTCxrfxs51auny',
+  endpoint: 'https://sb-openapi.zalopay.vn/v2/create'
+}
+export const createOrder = async (findOrderDetail) => {
+  const transID = Math.floor(Math.random() * 1000000)
+  const embed_data = {
+    redirecturl: 'http://localhost:3000/users'
+  }
+  const findOrder = await Order.findById(findOrderDetail.order_id)
+  const order = {
+    app_id: config.app_id,
+    app_trans_id: `${moment().format('YYMMDD')}_${transID}`,
+    app_user: findOrder.staff_in_charge.name,
+    app_time: Date.now(),
+    item: JSON.stringify([
+      {
+        item_id: findOrderDetail.dish_id._id,
+        item_name: findOrderDetail.dish_id.name,
+        item_price: Math.round(findOrderDetail.dish_id.price * 1000), // Chuyển sang đồng
+        item_quantity: findOrderDetail.quantity, // Hoặc lấy từ dữ liệu thực tế
+      },
+    ]),
+    embed_data: JSON.stringify(embed_data),
+    amount: findOrder.total_amount * 1000,
+    description: `Lazada - Payment for the order #${transID}`,
+    bank_code: '',
+    callback_url: 'https://0625-2403-e200-179-5c2c-8580-2716-a047-e53e.ngrok-free.app/payment/zalopay/callback'
+  }
+  console.log(`App trans iD is ${moment().format('YYMMDD')}_${transID}`)
+  const data =
+    config.app_id +
+    '|' +
+    order.app_trans_id +
+    '|' +
+    order.app_user +
+    '|' +
+    order.amount +
+    '|' +
+    order.app_time +
+    '|' +
+    order.embed_data +
+    '|' +
+    order.item
+  order.mac = CryptoJS.HmacSHA256(data, config.key1).toString()
+  try {
+    // Gửi request đến Zalo Pay
+    const response = await axios.post(config.endpoint, null, { params: order })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Có lỗi xảy ra khi kết nối Zalo Pay')
+  }
+}
+

@@ -19,7 +19,7 @@ app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(cookieParser())
-
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
