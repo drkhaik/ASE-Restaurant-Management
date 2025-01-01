@@ -26,7 +26,7 @@ const initApiRoutes = (app) => {
     router.use('/orders', requireAuth, orderRoute);
     router.use('/work-schedules', requireAuth , workScheduleRoute);
     router.use('/dishes', requireAuth, dishRoute);
-    router.use('/payment', requireAuth,  paymentRoute);
+    router.use('/payment',  paymentRoute);
     router.use('/inventories', requireAuth, inventoryRoute);
     router.use((req, res) => {
         res.status(404).render('404', { title: '404', layout: false });

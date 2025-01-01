@@ -1651,8 +1651,6 @@ select {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
-  
-  
   /* Order Summary */
   .order-summary {
     margin-bottom: 20px;
@@ -1661,8 +1659,6 @@ select {
     border-radius: 5px;
     background-color: #f7f7f7;
   }
-  
-  
   
   /* Order Items */
   .order-items .item {
@@ -1682,17 +1678,31 @@ select {
     padding: 10px;
     font-size: 18px;
     color: #fff;
-    background-color: #28a745;
+    background-color: #af0909;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
   }
+  .cash:hover {
+    background-color: #740404;
+  }
   .zalopay {
     margin-top: 10px;
+    background-color: #0068ff;
   }
-  .pay-now:hover {
-    background-color: #218838;
+
+  .zalopay:hover {
+    background-color: #0e3671;
+  }
+
+  .vnpay {
+    margin-top: 10px;
+    background-color: #005aa9;
+  }
+
+  .vnpay:hover {
+    background-color: #033c6e;
   }
 }
 
@@ -1706,7 +1716,7 @@ select {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
-  
+
 
 .billing-header h1 {
   font-size: 36px;

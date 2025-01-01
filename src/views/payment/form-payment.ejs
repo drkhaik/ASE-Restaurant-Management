@@ -27,13 +27,20 @@
           <% }); %>
         </div>
       </div>
-      <form action="/payment/pay-with-cash" method="POST" id="payWithCashForm">
+      <form action="/payment/pay" method="POST" id="payWithCashForm">
         <input type="hidden" name="orderId" value="<%= order._id %>" />
-        <button type="submit" class="pay-now">Pay with cash</button>
+        <input type="hidden" name="method" value="cash" />
+        <button type="submit" class="pay-now cash">Cash</button>
       </form>
-      <form action="/payment/zalopay" method="POST" id="payWithZaloPayForm">
-        <input type="hidden" name="orderInfo" value="<%= order._id %>" />
-        <button type="submit" class="pay-now zalopay">Pay with ZaloPay</button>
+      <form action="/payment/pay" method="POST" id="payWithZaloPayForm">
+        <input type="hidden" name="orderId" value="<%= order._id %>" />
+        <input type="hidden" name="method" value="zalopay" />
+        <button type="submit" class="pay-now zalopay">ZaloPay</button>
+      </form>
+      <form action="/payment/pay" method="POST">
+        <input type="hidden" name="orderId" value="<%= order._id %>" />
+        <input type="hidden" name="method" value="vnpay" />
+        <button type="submit" class="pay-now vnpay">VNPAY</button>
       </form>
       <% }); %>
 

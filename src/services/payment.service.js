@@ -7,6 +7,15 @@ import mongoose from 'mongoose';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import moment from 'moment';
+
+// Key for zalo payment
+const config = {
+  app_id: '554',
+  key1: '8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn',
+  key2: 'uUfsWgfLkRLzq6W2uNXTCxrfxs51auny',
+  endpoint: 'https://sb-openapi.zalopay.vn/v2/create'
+}
+
 // Tìm Payment theo order_id
 export const findPaymentByOrderId = async (orderId) => {
   return await Payment.findOne({ order_id: orderId });
@@ -28,7 +37,7 @@ export const getOrderDetails = async (orderId) => {
   const order = await Order.findById(orderId)
   console.log(order?.status)
   if (!order) {
-    throw new Error('Không tìm thấy đơn hàng!');
+    throw new Error('Order not found!');
   }
   
   const objectId = mongoose.Types.ObjectId.isValid(orderId) ? new mongoose.Types.ObjectId(orderId) : null;
@@ -64,13 +73,7 @@ export const findPaymentById = async (paymentId) => {
   return await Payment.findById(paymentId).populate('order_id');
 };
 
-// Thanh toán với zaloPay
-const config = {
-  app_id: '554',
-  key1: '8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn',
-  key2: 'uUfsWgfLkRLzq6W2uNXTCxrfxs51auny',
-  endpoint: 'https://sb-openapi.zalopay.vn/v2/create'
-}
+
 export const createOrder = async (findOrderDetail) => {
   const transID = Math.floor(Math.random() * 1000000)
   const embed_data = {
@@ -92,7 +95,7 @@ export const createOrder = async (findOrderDetail) => {
     ]),
     embed_data: JSON.stringify(embed_data),
     amount: findOrder.total_amount * 1000,
-    description: `Lazada - Payment for the order #${transID}`,
+    description: `Payment for the order #${transID}`,
     bank_code: '',
     callback_url: 'https://0625-2403-e200-179-5c2c-8580-2716-a047-e53e.ngrok-free.app/payment/zalopay/callback'
   }
@@ -117,7 +120,11 @@ export const createOrder = async (findOrderDetail) => {
     const response = await axios.post(config.endpoint, null, { params: order })
     return response.data
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Có lỗi xảy ra khi kết nối Zalo Pay')
+    throw new Error(error.response?.data?.message || 'Something went wrong while connecting to Zalopay...')
   }
 }
 
+// for method payment has chosen and execute it
+export const executePayment = async (paymentStrategy, orderId) => {
+  return await paymentStrategy.pay(orderId);
+};

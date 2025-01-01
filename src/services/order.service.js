@@ -4,6 +4,10 @@ import Dish from '../models/dish.model.js';
 import Table from '../models/table.model.js';
 
 
+export const fetchTotalAmountOfOrderById = async (order_id) => {
+    return await Order.findById(order_id).select({_id: 1, total_amount: 1});
+}
+
 export const getDishesService = () => {
     return new Promise(async (resolve, reject) => {
         try {

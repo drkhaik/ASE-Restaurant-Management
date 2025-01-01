@@ -1,19 +1,22 @@
 'use strict';
 
 import Express from "express";
-import { getBill, getPaymentInfo, payWithCash, zaloPayment } from "../controllers/payment.controller.js";
-import { checkPermission } from '../middleware/roleMiddleware.js';
-
+import { getBill, getPaymentInfo, handlePayment, vnpayReturn } from "../controllers/payment.controller.js"
 const router = Express.Router();
 
 // Display Payment info
-router.get('/order-detail-pay/:id', checkPermission("manage_payments"), getPaymentInfo);
+router.get('/order-detail-pay/:id', getPaymentInfo);
 
-// Process payment with cash
-router.post('/pay-with-cash', checkPermission("manage_payments"), payWithCash);
+/**
+  * @description Payment (cash, zalopay,...)
+  * @param {ObjectId} orderId
+  * @param {String} method
+  * @method POST
+  */
+router.post('/pay', handlePayment);
+router.get('/vnpay_return', vnpayReturn);
 
 // Display Bill
-router.get('/bill/:id', checkPermission("manage_payments"), getBill);
+router.get('/bill/:id', getBill);
 
-router.post('/zalopay', checkPermission("manage_payments"),zaloPayment)
 export default router;
