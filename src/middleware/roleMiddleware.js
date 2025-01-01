@@ -21,7 +21,6 @@ const roles = {
 export function checkPermission(action) {
     return (req, res, next) => {
         const userRole = res.locals.user.role;
-
         // Grant all permissions to admin
         if (userRole === "admin") {
             return next(); // Admin bypasses all permission checks
