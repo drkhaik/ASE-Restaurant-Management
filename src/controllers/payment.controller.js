@@ -76,8 +76,8 @@ export const getBill = async (req, res) => {
 // handle payment with PaymentStrategy (Strategy Pattern)
 export const handlePayment = async (req, res) => {
   const { orderId, method } = req.body;
-  console.log("check method", method);
   const PaymentStrategy = paymentStrategies[method];
+
   if (!PaymentStrategy) {
     return res.status(400).send("Invalid payment method");
   }
@@ -86,17 +86,45 @@ export const handlePayment = async (req, res) => {
 
   try {
     const result = await executePayment(paymentStrategy, orderId);
-    if (method === 'vnpay') {
-      return res.redirect(result); // Redirect to VNPAY payment URL
-    }
-    if (method === 'zalopay') {
-      return res.redirect(result); // Redirect to ZaloPay payment URL
-    }
-    res.redirect(`/payment/bill/${orderId}`);
+    processReturn(res, result, method, orderId);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Process the return based on the payment method
+const processReturn = (res, result, method, orderId) => {
+  if (method === 'vnpay' || method === 'zalopay') {
+    return res.redirect(result);
+  }
+  res.redirect(`/payment/bill/${orderId}`);
+};
+
+
+// export const handlePayment = async (req, res) => {
+//   const { orderId, method } = req.body;
+//   const PaymentStrategy = paymentStrategies[method];
+//   if (!PaymentStrategy) {
+//     return res.status(400).send("Invalid payment method");
+//   }
+
+//   const paymentStrategy = new PaymentStrategy();
+
+//   try {
+//     const result = await executePayment(paymentStrategy, orderId);
+
+//     if (method === 'vnpay') {
+//       return res.redirect(result);
+//     }
+//     if (method === 'zalopay') {
+//       return res.redirect(result);
+//     }
+//     res.redirect(`/payment/bill/${orderId}`);
+
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 export const vnpayReturn = async (req, res) => {
   const responseParams = req.query;

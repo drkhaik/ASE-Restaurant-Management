@@ -14,6 +14,7 @@ router.get('/order-detail-pay/:id', getPaymentInfo);
   * @method POST
   */
 router.post('/pay', handlePayment);
+
 router.get('/vnpay_return', vnpayReturn);
 
 // Display Bill
