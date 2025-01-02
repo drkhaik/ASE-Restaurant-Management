@@ -83,14 +83,14 @@ export const createOrder = async (findOrderDetail) => {
   const order = {
     app_id: config.app_id,
     app_trans_id: `${moment().format('YYMMDD')}_${transID}`,
-    app_user: findOrder.staff_in_charge.name,
+    app_user: findOrder.staff_in_charge,
     app_time: Date.now(),
     item: JSON.stringify([
       {
         item_id: findOrderDetail.dish_id._id,
         item_name: findOrderDetail.dish_id.name,
-        item_price: Math.round(findOrderDetail.dish_id.price * 1000), // Chuyển sang đồng
-        item_quantity: findOrderDetail.quantity, // Hoặc lấy từ dữ liệu thực tế
+        item_price: Math.round(findOrderDetail.dish_id.price * 1000),
+        item_quantity: findOrderDetail.quantity,
       },
     ]),
     embed_data: JSON.stringify(embed_data),
@@ -99,6 +99,7 @@ export const createOrder = async (findOrderDetail) => {
     bank_code: '',
     callback_url: 'https://0625-2403-e200-179-5c2c-8580-2716-a047-e53e.ngrok-free.app/payment/zalopay/callback'
   }
+  
   console.log(`App trans iD is ${moment().format('YYMMDD')}_${transID}`)
   const data =
     config.app_id +

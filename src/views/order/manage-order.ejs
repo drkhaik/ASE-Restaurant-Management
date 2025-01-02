@@ -23,10 +23,12 @@
         </thead>
         <tbody>
             <% if (orders && orders.length > 0) { %>
+                <% let i = 0 %>
                 <% orders.forEach(order => { %>
+                    <% i++ %>
                     <!-- Order Row -->
                     <tr>
-                        <td><%= order._id %></td>
+                        <td><%= i %></td>
                         <td><%= order.staff_in_charge.name %></td>
                         <td><%= order.total_amount %> $</td>
                         <td>
