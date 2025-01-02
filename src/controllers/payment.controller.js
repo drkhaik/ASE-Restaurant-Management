@@ -1,24 +1,29 @@
 import { 
   findPaymentByOrderId, 
   createPayment, 
-  getOrderDetails, 
-  updatePaymentStatus, 
-  findPaymentById, 
-  createOrder
+  getOrderDetails,
+  executePayment,
+  updatePaymentStatus
 } from '../services/payment.service.js';
-import Order from "../models/order.model.js"
-import OrderDetail from '../models/orderDetail.model.js';
-// Lấy thông tin hoặc tạo Payment
+import CashPayment from '../services/payment_method/cashPayment.js';
+import ZalopayPayment from '../services/payment_method/zalopayPayment.js';
+import VnpayPayment from '../services/payment_method/vnpayPayment.js';
+
+const paymentStrategies = {
+  cash: CashPayment,
+  zalopay: ZalopayPayment,
+  vnpay: VnpayPayment,
+};
+
+// Get Payment Info
 export const getPaymentInfo = async (req, res) => {
   const { id } = req.params;
   try {
-    // Kiểm tra nếu Payment đã tồn tại
     let payment = await findPaymentByOrderId(id);
-    // Nếu chưa tồn tại, tạo mới
     if (!payment) {
       const order = await getOrderDetails(id);
       payment = await createPayment(order, 'paywithcash');
-      // Gắn dữ liệu của order vào payment để render
+      // Attach data of order to payment for rendering
       payment = {
         ...order,
         paymentMethod: payment.paymentMethod,
@@ -30,41 +35,26 @@ export const getPaymentInfo = async (req, res) => {
         paymentMethod: payment.paymentMethod,
       };
     }
-    // Render giao diện
+    // Render UI
     res.render('payment/form-payment', {
       title: 'Payment',
       orders: [payment],
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Đã xảy ra lỗi khi lấy thông tin Payment!' });
+    res.status(500).json({ message: 'Error from server...' });
   }
 };
 
-// Thanh toán bằng tiền mặt
-export const payWithCash = async (req, res) => {
-  const { orderId } = req.body;
-  try {
-    const updatedPayment = await updatePaymentStatus(orderId, 'cash', 'PAID');
-    if (!updatedPayment) {
-      return res.status(404).json({ message: 'Không tìm thấy Payment!' });
-    }
-
-    res.redirect(`/payment/bill/${updatedPayment._id}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Lỗi từ server...' });
-  }
-};
-
-// Hiển thị hóa đơn
+// Get bill
 export const getBill = async (req, res) => {
-  const { orderId } = req.body;
+  const {id} = req.params;
   try {
-    const payment = await findPaymentById(id);
-
+    // console.log("check id", id);
+    const payment = await findPaymentByOrderId(id);
+    // console.log("check payment", payment)
     if (!payment) {
-      return res.status(404).json({ message: 'Không tìm thấy Payment!' });
+      return res.status(404).json({ message: 'Payment not found!' });
     }
 
     const order = await getOrderDetails(payment.order_id);
@@ -73,34 +63,52 @@ export const getBill = async (req, res) => {
       title: 'Hóa Đơn',
       payment: {
         ...order,
+        status: payment.status,
         paymentMethod: payment.paymentMethod,
       },
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Lỗi từ server!' });
+    res.status(500).json({ message: 'Error from server...' });
   }
 };
 
-// Thanh toán với zalopay
-export const zaloPayment = async (req, res) => {
-  try {
-    const findOrderDetail = await OrderDetail.find({order_id: req.body.orderInfo}).populate('dish_id');
-    const zaloPayResponse = await createOrder(findOrderDetail[0])
-    if (zaloPayResponse.return_code === 1) {
-      const updatedPayment = await updatePaymentStatus(req.body.orderInfo, 'zalopay', 'PAID');
-      if (!updatedPayment) {
-        return res.status(404).json({ message: 'Không tìm thấy Payment!' });
-      }
-      // Chuyển hướng đến URL thanh toán
-      return res.redirect(zaloPayResponse.order_url);
-    }
-
-    res.status(400).json({
-      message: zaloPayResponse.return_message || 'Giao dịch không thành công',
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message })
+// handle payment with PaymentStrategy (Strategy Pattern)
+export const handlePayment = async (req, res) => {
+  const { orderId, method } = req.body;
+  console.log("check method", method);
+  const PaymentStrategy = paymentStrategies[method];
+  if (!PaymentStrategy) {
+    return res.status(400).send("Invalid payment method");
   }
-}
 
+  const paymentStrategy = new PaymentStrategy();
+
+  try {
+    const result = await executePayment(paymentStrategy, orderId);
+    if (method === 'vnpay') {
+      return res.redirect(result); // Redirect to VNPAY payment URL
+    }
+    if (method === 'zalopay') {
+      return res.redirect(result); // Redirect to ZaloPay payment URL
+    }
+    res.redirect(`/payment/bill/${orderId}`);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const vnpayReturn = async (req, res) => {
+  const responseParams = req.query;
+
+  if (responseParams.vnp_ResponseCode === '00') {
+    await updatePaymentStatus(responseParams.vnp_TxnRef, 'vnpay', 'PAID');
+    res.render('payment/vnp-return', {
+      title: "Ket Qua GD",
+      message: "Giao dịch thành công",
+      id: responseParams.vnp_TxnRef
+    });
+  } else {
+    res.send('Giao dịch không thành công. Mã lỗi: ' + responseParams.vnp_ResponseCode);
+  }
+};

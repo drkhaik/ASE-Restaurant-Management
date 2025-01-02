@@ -1,7 +1,6 @@
 'use strict';
 
 import Express from "express";
-const router = Express.Router();
 import {
     fetchWorkSchedules,
     getWorkScheduleCreate,
@@ -9,19 +8,23 @@ import {
     getPerformanceAppraisal,
     postPerformanceAppraisal,
     getWorkingDatesByUser
-}
-from "../controllers/workSchedule.controller.js"
+} from "../controllers/workSchedule.controller.js";
+import { checkPermission } from '../middleware/roleMiddleware.js';
 
-// add work-schedule
-router.get('/add-work-schedule', getWorkScheduleCreate);
-router.post('/add-work-schedule', postWorkScheduleCreate);
+const router = Express.Router();
 
-// get work-schedules
-router.get('/', fetchWorkSchedules);
+// Add work-schedule
+router.get('/add-work-schedule', checkPermission("manage_schedules"), getWorkScheduleCreate);
+router.post('/add-work-schedule', checkPermission("manage_schedules"), postWorkScheduleCreate);
 
-router.get('/working-dates/:userId', getWorkingDatesByUser);
-router.get('/performance-appraisal', getPerformanceAppraisal);
-router.post('/performance-appraisal', postPerformanceAppraisal);
+// Get work-schedules
+router.get('/', checkPermission("view_schedules"), fetchWorkSchedules);
 
+// View working dates
+router.get('/working-dates/:userId', checkPermission("view_schedules"), getWorkingDatesByUser);
+
+// Performance appraisal
+router.get('/performance-appraisal', checkPermission("manage_schedules"), getPerformanceAppraisal);
+router.post('/performance-appraisal', checkPermission("manage_schedules"), postPerformanceAppraisal);
 
 export default router;

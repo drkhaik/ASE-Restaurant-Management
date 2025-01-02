@@ -1,6 +1,12 @@
 import Order from '../models/order.model.js';
 import OrderDetail from '../models/orderDetail.model.js';
 import Dish from '../models/dish.model.js';
+import Table from '../models/table.model.js';
+
+
+export const fetchTotalAmountOfOrderById = async (order_id) => {
+    return await Order.findById(order_id).select({_id: 1, total_amount: 1});
+}
 
 export const getDishesService = () => {
     return new Promise(async (resolve, reject) => {
@@ -112,6 +118,41 @@ export const fetchOrderWithDetailsById = (id) => {
     });
 };
 
+const updateTableStatus = (orderId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const table = await Table.findOne({ currentOrder: orderId });
+
+            if (!table) {
+                return resolve({
+                    errCode: 1,
+                    message: 'Table not found!',
+                });
+            }
+
+            table.status = "AVAILABLE";
+            table.currentOrder = null;
+
+            table.updatedAt = new Date();
+
+            await Table.updateOne({ _id: table._id }, table);
+
+            resolve({
+                errCode: 0,
+                message: "OK",
+            });
+        } catch (e) {
+            // Log error and reject with an error message
+            console.error('Error fetching table id:', e);
+            reject({
+                errCode: 1,
+                message: 'Failed to fetch table id',
+                error: e.message,
+            });
+        }
+    });
+};
+
 export const updateOrderService = (data) => {
     return new Promise(async (resolve, reject) => {
         const session = await Order.startSession(); // Start a session for transactions
@@ -139,6 +180,11 @@ export const updateOrderService = (data) => {
             order.staff_in_charge = data.staff_in_charge;
             order.total_amount = parseFloat(data.total_amount);
             order.status = data.status
+
+            if(data.status === "PAID"){
+                const tableId = await updateTableStatus(data._id)
+            }
+
             order.updatedAt = new Date();
 
             await order.save({ session }); // Save the updated order

@@ -127,40 +127,45 @@ export const updateTableService = (data) => {
             table.name = data.name;
             table.status = data.status;
             // Step 4: Parse the currentOrder if available
-            let currentOrder;
-            if (data.currentOrder) {
-                try {
-                    currentOrder = JSON.parse(data.currentOrder);
-                    console.log("currentOrder:", currentOrder); // Optional: Check currentOrder contents
-                } catch (e) {
-                    console.error("Error parsing currentOrder:", e);
-                    return resolve({
-                        errCode: 3,
-                        message: 'Failed to parse currentOrder!'
-                    });
+            if(data.status === "AVAILABLE"){
+                table.currentOrder = null
+            }else{
+                let currentOrder;
+                if (data.currentOrder) {
+                    try {
+                        currentOrder = JSON.parse(data.currentOrder);
+                        console.log("currentOrder:", currentOrder); // Optional: Check currentOrder contents
+                    } catch (e) {
+                        console.error("Error parsing currentOrder:", e);
+                        return resolve({
+                            errCode: 3,
+                            message: 'Failed to parse currentOrder!'
+                        });
+                    }
+                }
+                // Check if currentOrder exists and save it
+                if (currentOrder) {
+                    const response = await saveOrderService(currentOrder);
+                    // Check if saveOrderService was successful
+                    if (response.errCode !== 0) {
+                        // Handle error from saveOrderService
+                        return resolve({
+                            errCode: response.errCode,
+                            message: response.message
+                        });
+                    }
+                    // If saveOrderService was successful, proceed with the table update
+                    table.currentOrder = response.orderId; // Use the returned orderId from saveOrderService
                 }
             }
-            // Step 5: Check if currentOrder exists and save it
-            if (currentOrder) {
-                const response = await saveOrderService(currentOrder);
-                // Check if saveOrderService was successful
-                if (response.errCode !== 0) {
-                    // Handle error from saveOrderService
-                    return resolve({
-                        errCode: response.errCode,
-                        message: response.message
-                    });
-                }
-                // If saveOrderService was successful, proceed with the table update
-                table.currentOrder = response.orderId; // Use the returned orderId from saveOrderService
-            }
-            // Step 6: Set the updatedAt timestamp
+
+            // Step 5: Set the updatedAt timestamp
             table.updatedAt = new Date();
 
-            // Step 7: Update the table in the database
+            // Step 6: Update the table in the database
             await Table.updateOne({ _id: data._id }, table);
 
-            // Step 8: Resolve with a success message
+            // Step 7: Resolve with a success message
             resolve({
                 errCode: 0,
                 message: `Table updated successfully!`

@@ -1458,6 +1458,26 @@ select {
   background-color: #0056b3;
 }
 
+/* Remove Order Button */
+.remove-order-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff1e00;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 4px;
+  width: auto;  /* Make the button width auto for a shorter button */
+  margin-bottom: 15px;
+  margin-left: auto; /* Push the button to the right */
+  transition: background-color 0.3s ease;
+}
+
+.remove-order-button:hover {
+  background-color: #b74e07;
+}
+
 /* Submit Button */
 .submit-button {
   width: 100%;
@@ -1631,8 +1651,6 @@ select {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
-  
-  
   /* Order Summary */
   .order-summary {
     margin-bottom: 20px;
@@ -1641,8 +1659,6 @@ select {
     border-radius: 5px;
     background-color: #f7f7f7;
   }
-  
-  
   
   /* Order Items */
   .order-items .item {
@@ -1662,17 +1678,31 @@ select {
     padding: 10px;
     font-size: 18px;
     color: #fff;
-    background-color: #28a745;
+    background-color: #af0909;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
   }
+  .cash:hover {
+    background-color: #740404;
+  }
   .zalopay {
     margin-top: 10px;
+    background-color: #0068ff;
   }
-  .pay-now:hover {
-    background-color: #218838;
+
+  .zalopay:hover {
+    background-color: #0e3671;
+  }
+
+  .vnpay {
+    margin-top: 10px;
+    background-color: #005aa9;
+  }
+
+  .vnpay:hover {
+    background-color: #033c6e;
   }
 }
 
@@ -1686,7 +1716,7 @@ select {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
-  
+
 
 .billing-header h1 {
   font-size: 36px;

@@ -24,7 +24,7 @@ export const handleLogin = async (req, res) => {
         let response = await handleLoginService(username, password)
         if (response?.data?.access_token) {
             res.cookie("jwt", response.data.access_token,
-                { httpOnly: true, maxAge: 60 * 60 * 1000, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+                { httpOnly: true, maxAge: 60*60 * 60 * 1000, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
         }
         return res.status(200).json(response);
     } catch (e) {

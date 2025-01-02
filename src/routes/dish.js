@@ -1,7 +1,6 @@
 'use strict';
 
 import Express from "express";
-const router = Express.Router();
 import {
     fetchAllDish,
     getDishCreate,
@@ -9,21 +8,23 @@ import {
     getDishEdit,
     postDishUpdate,
     deleteDish
-}
-from "../controllers/dish.controller.js"
+} from "../controllers/dish.controller.js";
+import { checkPermission } from '../middleware/roleMiddleware.js';
+
+const router = Express.Router();
 
 // Add dish
-router.get('/add-dish', getDishCreate);
-router.post('/add-dish', postDishCreate);
+router.get('/add-dish', checkPermission("manage_dishes"), getDishCreate);
+router.post('/add-dish', checkPermission("manage_dishes"), postDishCreate);
 
-// Get dish
-router.get('/', fetchAllDish);
+// Get dishes
+router.get('/', checkPermission("view_dishes"), fetchAllDish);
 
 // Update dish
-router.get('/edit-dish/:id', getDishEdit); // Thêm :id để nhận ID của Dish
-router.post('/update-dish', postDishUpdate); 
+router.get('/edit-dish/:id', checkPermission("manage_dishes"), getDishEdit);
+router.post('/update-dish', checkPermission("manage_dishes"), postDishUpdate);
 
 // Delete dish
-router.get('/:id', deleteDish); // Add route for deleting dish
+router.get('/:id', checkPermission("manage_dishes"), deleteDish);
 
 export default router;

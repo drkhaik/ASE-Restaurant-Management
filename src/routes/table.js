@@ -1,7 +1,6 @@
 'use strict';
 
 import Express from "express";
-const router = Express.Router();
 import {
     fetchAllTable,
     getTableCreate,
@@ -9,19 +8,23 @@ import {
     getTableDetail,
     postTableUpdate,
     deleteTable
-}
-from "../controllers/table.controller.js"
+} from "../controllers/table.controller.js";
+import { checkPermission } from '../middleware/roleMiddleware.js';
+
+const router = Express.Router();
 
 // Add table
-router.get('/add-table', getTableCreate);
-router.post('/add-table', postTableCreate);
+router.get('/add-table', checkPermission("manage_tables"), getTableCreate);
+router.post('/add-table', checkPermission("manage_tables"), postTableCreate);
 
 // Get table
-router.get('/', fetchAllTable);
+router.get('/', checkPermission("view_tables"), fetchAllTable);
 
 // Table Details
-router.get('/table-details/:id', getTableDetail);
-router.post('/update-table', postTableUpdate); 
-router.get('/:id', deleteTable);
+router.get('/table-details/:id', checkPermission("view_tables"), getTableDetail);
+router.post('/update-table', checkPermission("manage_tables"), postTableUpdate);
+
+// Delete table
+router.get('/:id', checkPermission("manage_tables"), deleteTable);
 
 export default router;
