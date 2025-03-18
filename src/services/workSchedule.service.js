@@ -2,179 +2,139 @@ import WorkSchedule from '../models/workSchedule.model.js';
 import _ from 'lodash';
 import moment from 'moment';
 
-const fetchScheduleByUserAndDate = async ({user, date}) => {
-    return await WorkSchedule.findOne({
-        user: user,
-        date: date
-    })
-}
+const fetchScheduleByUserAndDate = async ({ user, date }) => {
+    return await WorkSchedule.findOne({ user, date });
+};
 
-export const saveWorkScheduleService = (data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-                // console.log("check workSchedule data", data);
-                // figure out if it duplicate date and user
-                const existingSchedule = await fetchScheduleByUserAndDate({user: data.user_id, date: data.date });
+export const saveWorkScheduleService = async (data) => {
+    try {
+        const existingSchedule = await fetchScheduleByUserAndDate({ user: data.user_id, date: data.date });
 
-                if (existingSchedule){
-                    existingSchedule.shift = data.shift;
-                    existingSchedule.updatedAt = new Date();
-                    await existingSchedule.save();
-                }else{
-                    const workSchedule = new WorkSchedule({
-                        user: data.user_id,
-                        shift: data.shift,
-                        date: data.date,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    });
-                    await workSchedule.save();
-                }
-                resolve({
-                    errCode: 0,
-                    message: "OK",
-                })
-            
-        } catch (e) {
-            reject(e);
-        }
-    })
-}
-
-export const fetchWorkScheduleById = (id) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let workSchedules = await WorkSchedule.findOne({
-                // raw: true,
-                _id: id
-            }).select({
-                __v: 0,
-                createdAt: 0,
-                updatedAt: 0,
+        if (existingSchedule) {
+            existingSchedule.shift = data.shift;
+            existingSchedule.updatedAt = new Date();
+            await existingSchedule.save();
+        } else {
+            const workSchedule = new WorkSchedule({
+                user: data.user_id,
+                shift: data.shift,
+                date: data.date,
+                createdAt: new Date(),
+                updatedAt: new Date()
             });
-            // users.get({ plain: true });
-            resolve({
-                errCode: 0,
-                message: "OK",
-                data: workSchedules
-            })
-        } catch (e) {
-            reject(e)
+            await workSchedule.save();
         }
-    })
-}
+
+        return { errCode: 0, message: "OK" };
+    } catch (e) {
+        return { errCode: 1, message: "Error saving work schedule", error: e };
+    }
+};
+
+export const fetchWorkScheduleById = async (id) => {
+    try {
+        let workSchedule = await WorkSchedule.findById(id).select({
+            __v: 0,
+            createdAt: 0,
+            updatedAt: 0
+        });
+
+        if (!workSchedule) {
+            return { errCode: 1, message: "Work schedule not found" };
+        }
+
+        return { errCode: 0, message: "OK", data: workSchedule };
+    } catch (e) {
+        return { errCode: 1, message: "Error fetching work schedule", error: e };
+    }
+};
 
 export const getWorkingDatesByUserService = async (userId) => {
-        try {
-            console.log("check userId", userId);
-            const workSchedules = await WorkSchedule.find({ user: userId});
-            const workingDates = workSchedules.map(schedule => ({
-                _id: schedule._id, // _id for update schedule
-                formattedDate: schedule.date.toISOString().split('T')[0],
-                shift: schedule.shift
-            }));
-            // console.log("check working date", workingDates);
-            return workingDates;
-        } catch (e) {
-            throw new Error('Error fetching working dates', e);
-        }
-}
+    try {
+        const workSchedules = await WorkSchedule.find({ user: userId });
 
-export const updateWorkScheduleService = (data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!data._id) {
-                resolve({
-                    errCode: 2,
-                    message: 'Missing required parameters!'
-                })
-            }
-            let workSchedule = await WorkSchedule.findOne({
-                _id: data._id
-            })
-            // console.log("check res", user);
-            if (workSchedule) {
-                workSchedule.performance_score = data.performance_score,
-                    workSchedule.comments = !_.isEmpty(data.comments) ? data.comments : "Not yet",
-                // workSchedule.evaluator_by = data.evaluator_by,
-                workSchedule.updatedAt = new Date();
-                await WorkSchedule.updateOne({ _id: data._id }, workSchedule);
-                resolve({
-                    errCode: 0,
-                    message: `Ok`
-                });
-            } else {
-                resolve({
-                    errCode: 1,
-                    message: `The WorkSchedule not found!`
-                })
-            }
-        } catch (e) {
-            reject(e);
-        }
-    })
-}
+        const workingDates = workSchedules.map(schedule => ({
+            _id: schedule._id, 
+            formattedDate: schedule.date.toISOString().split('T')[0],
+            shift: schedule.shift
+        }));
 
-export const fetchSchedulesPerformanceService = () => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const workSchedules = await WorkSchedule.find({
-                performance_score: { $exists: true}
-            })
+        return workingDates;
+    } catch (e) {
+        console.error("Error fetching working dates:", e);
+        return { errCode: 1, message: "Error fetching working dates", error: e };
+    }
+};
+
+export const updateWorkScheduleService = async (data) => {
+    try {
+        if (!data._id) {
+            return { errCode: 2, message: 'Missing required parameters!' };
+        }
+
+        let workSchedule = await WorkSchedule.findById(data._id);
+        if (!workSchedule) {
+            return { errCode: 1, message: 'WorkSchedule not found!' };
+        }
+
+        workSchedule.performance_score = data.performance_score;
+        workSchedule.comments = !_.isEmpty(data.comments) ? data.comments : "Not yet";
+        workSchedule.updatedAt = new Date();
+
+        await workSchedule.save();
+
+        return { errCode: 0, message: "OK" };
+    } catch (e) {
+        return { errCode: 1, message: "Error updating work schedule", error: e };
+    }
+};
+
+export const fetchSchedulesPerformanceService = async () => {
+    try {
+        const workSchedules = await WorkSchedule.find({ performance_score: { $exists: true } })
             .populate('user', 'name')
             .populate('evaluator_by', 'name');
-            
-            const formattedSchedules = [];
-            for (let i = 0; i < workSchedules.length; i++) {
-                let schedule = workSchedules[i].toObject();
-                let formatDate = moment(workSchedules[i].date).format('MMM D');
-                let user = schedule.user;
-                formattedSchedules.push({ ...schedule, date: formatDate, user: user.name });
-            }
 
-            resolve({
-                errCode: 0,
-                message: "OK",
-                data: formattedSchedules,
-            })
+        const formattedSchedules = workSchedules.map(schedule => ({
+            ...schedule.toObject(),
+            date: moment(schedule.date).format('MMM D'),
+            user: schedule.user ? schedule.user.name : "Unknown"
+        }));
 
-        } catch (e) {
-            reject(e)
-        }
-    })
-}
+        return { errCode: 0, message: "OK", data: formattedSchedules };
+    } catch (e) {
+        return { errCode: 1, message: "Error fetching schedules performance", error: e };
+    }
+};
 
-export const fetchWorkSchedulesService = () => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const workSchedules = await WorkSchedule.find()
-                .populate('user', 'name')
-                .populate('evaluator_by', 'name');
+export const fetchWorkSchedulesService = async () => {
+    try {
+        const workSchedules = await WorkSchedule.find()
+            .populate('user', 'name')
+            .populate('evaluator_by', 'name');
 
-            const { groupedScheduleData, datesForTable } = formatWorkSchedules(workSchedules);
-            resolve({
-                errCode: 0,
-                message: "OK",
-                data: groupedScheduleData,
-                datesForTable: datesForTable, 
-            })
+        const { groupedScheduleData, datesForTable } = formatWorkSchedules(workSchedules);
 
-        } catch (e) {
-            reject(e)
-        }
-    })
-}
+        return { errCode: 0, message: "OK", data: groupedScheduleData, datesForTable };
+    } catch (e) {
+        return { errCode: 1, message: "Error fetching work schedules", error: e };
+    }
+};
 
 const formatWorkSchedules = (workSchedules) => {
     const formattedSchedules = [];
     const datesSet = new Set();
 
-    for (let i = 0; i < workSchedules.length; i++) {
-        let schedule = workSchedules[i].toObject();
-        let formatDate = moment(workSchedules[i].date).format('MMM D');
-        let user = schedule.user;
+    for (let schedule of workSchedules) {
+        let scheduleObj = schedule.toObject();
+        let formatDate = moment(schedule.date).format('MMM D');
 
-        formattedSchedules.push({ ...schedule, date: formatDate, user: user.name });
+        formattedSchedules.push({ 
+            ...scheduleObj, 
+            date: formatDate, 
+            user: scheduleObj.user ? scheduleObj.user.name : "Unknown" 
+        });
+
         datesSet.add(formatDate);
     }
 
@@ -197,13 +157,11 @@ const groupedSchedule = (scheduleData) => {
 
     const allUsers = Array.from(new Set(scheduleData.map(entry => entry.user)));
 
-    const formattedSchedule = allUsers.map(user => {
+    return allUsers.map(user => {
         const row = { Staff: user };
         for (const date in groupedSchedule) {
             row[date] = groupedSchedule[date][user] || 'off';
         }
         return row;
     });
-
-    return formattedSchedule;
-}
+};
